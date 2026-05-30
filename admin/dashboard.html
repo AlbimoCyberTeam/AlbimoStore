@@ -5,17 +5,18 @@
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
-  <nav>
+<body style="background-color: #fdfafb;">
+  <nav style="background: #8b0000; color: white;">
     <h2>Albimo Admin Panel</h2>
     <div>
-      <a href="dashboard.html">Pesanan</a> | 
-      <a href="add-product.html">Tambah Produk</a>
+      <a href="dashboard.html" style="color: white; font-weight: bold; border-bottom: 2px solid white; padding-bottom: 5px;">Pesanan</a> | 
+      <a href="products.html" style="color: rgba(255,255,255,0.8);">Produk</a> |
+      <a href="users.html" style="color: rgba(255,255,255,0.8);">User</a>
     </div>
   </nav>
 
-  <div style="padding: 5%;">
-    <h3>Daftar Masuk Pesanan</h3>
+  <div style="padding: 3% 5%;">
+    <h3 style="color: #2c0000; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-bottom: 25px;">Daftar Masuk Pesanan</h3>
     <div id="orders-list">Loading orders...</div>
   </div>
 
@@ -30,31 +31,29 @@
         const orders = snapshot.val();
         let html = '';
         for(let id in orders) {
-  const order = orders[id];
-  
-  // 1. LETAKKAN KODE KUSTOMISASI PESAN DI SINI (Sebelum template HTML)
-  const pesanWA = `Halo ${order.customer.name}, kami dari Albimo Store. Pesanan Anda dengan ID *${id}* telah kami terima dan sedang diproses. Mohon tunggu informasi pengiriman selanjutnya, ya!`;
-  const linkWA = `https://wa.me{order.customer.whatsapp}?text=${encodeURIComponent(pesanWA)}`;
+          const order = orders[id];
+          
+          // Format pesan WhatsApp otomatis
+          const pesanWA = `Halo ${order.customer.name}, kami dari Albimo Store. Pesanan Anda dengan ID *${id}* telah kami terima dan sedang diproses. Mohon tunggu informasi pengiriman selanjutnya, ya!`;
+          const linkWA = `https://wa.me{order.customer.whatsapp}?text=${encodeURIComponent(pesanWA)}`;
 
-  html += `
-    <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05)">
-      <h4>Order ID: ${id} (<span style="color:orange;">${order.status}</span>)</h4>
-      <p><strong>Pemesan:</strong> ${order.customer.name} - ${order.customer.whatsapp}</p>
-      <p><strong>Alamat:</strong> ${order.customer.address}</p>
-      <ul>
-        ${order.items.map(item => `<li>${item.name} (Rp ${Number(item.price).toLocaleString()})</li>`).join('')}
-      </ul>
-      
-      <!-- 2. PASANG VARIABEL linkWA DI SINI -->
-      <a href="${linkWA}" target="_blank" class="btn" style="background:#22c55e;">Follow up via WA</a>
-      
-    </div>
-  `;
-}
-
+          html += `
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 4px 10px rgba(139,0,0,0.04); border-left: 5px solid #8b0000;">
+              <h4 style="margin-top:0; color:#8b0000;">Order ID: ${id} (<span style="color:#eab308;">${order.status}</span>)</h4>
+              <p style="margin: 5px 0;"><strong>Pemesan:</strong> ${order.customer.name} - ${order.customer.whatsapp}</p>
+              <p style="margin: 5px 0;"><strong>Alamat:</strong> ${order.customer.address}</p>
+              <ul style="padding-left: 20px; color: #64748b; margin: 10px 0;">
+                ${order.items.map(item => `<li>${item.name} (Rp ${Number(item.price).toLocaleString('id-ID')})</li>`).join('')}
+              </ul>
+              <div style="margin-top: 15px;">
+                <a href="${linkWA}" target="_blank" class="btn" style="background:#22c55e;">Follow up via WA</a>
+              </div>
+            </div>
+          `;
+        }
         listContainer.innerHTML = html;
       } else {
-        listContainer.innerHTML = '<p>Belum ada pesanan masuk.</p>';
+        listContainer.innerHTML = '<p style="color: #64748b;">Belum ada pesanan masuk.</p>';
       }
     });
   </script>
