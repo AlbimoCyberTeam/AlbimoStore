@@ -1,52 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>Albimo Store</title>
-<link rel="stylesheet" href="assets/css/style.css">
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script src="firebase/config.js"></script>
+  <meta charset="UTF-8">
+  <title>Albimo Store | Home</title>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-<div class="header">
-<h2>Albimo Store</h2>
-<div>
-<a href="auth/login.html">Login</a>
-<a href="cart.html">Cart</a>
-</div>
-</div>
+  <nav>
+    <a href="index.html"><h1>Albimo Store</h1></a>
+    <div>
+      <a href="products.html">Produk</a> | 
+      <a href="cart.html">Keranjang (<span id="cart-count">0</span>)</a> | 
+      <a href="auth/login.html" id="auth-link">Login</a>
+    </div>
+  </nav>
 
-<div class="hero">
-<h2>Belanja Produk Fisik & Digital</h2>
-</div>
+  <h2 style="padding: 2rem 5% 0;">Produk Terbaru</h2>
+  <div class="grid" id="latest-products"></div>
 
-<div class="product-list" id="products"></div>
+  <script type="module">
+    import { ref, get, child } from "https://gstatic.com";
+    import { db } from "./firebase/config.js";
 
-<script>
-db.ref("products").on("value", snap=>{
-  let html="";
-  snap.forEach(d=>{
-    let p=d.val();
-    html+=`
-    <div class="card">
-      <img src="${p.image}">
-      <h3>${p.name}</h3>
-      <p>Rp ${p.price}</p>
-      <button onclick="addCart('${d.key}')">Tambah</button>
-    </div>`;
-  });
-  document.getElementById("products").innerHTML=html;
-});
-
-function addCart(id){
-  const user = auth.currentUser;
-  if(!user) return alert("Login dulu!");
-  db.ref("cart/"+user.uid+"/"+id).set({qty:1});
-  alert("Masuk keranjang");
-}
-</script>
-
+    const container = document.getElementById('latest-products');
+    
+    get(child(ref(db), 'products')).then((snapshot) => {
+      if (snapshot.exists()) {
+        const products = snapshot.val();
+        let html = '';
+        for (let id in products) {
+          html += `
+            <div class="card">
+              <img src="${products[id].image}" alt="${products[id].name}">
+              <div class="card-body">
+                <h3>${products[id].name}</h3>
+                <p>Rp ${Number(products[id].price).toLocaleString('id-ID')}</p>
+                <a href="product-detail.html?id=${id}" class="btn">Detail</a>
+              </div>
+            </div>`;
+        }
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = '<p>Belum ada produk.</p>';
+      }
+    });
+  </script>
 </body>
 </html>

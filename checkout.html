@@ -1,19 +1,58 @@
-<h2>Checkout</h2>
-<p>Transfer ke:</p>
-<p>Bank BNI - 2038992622 - Albimo Store</p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div style="max-width: 500px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px;">
+    <h2>Form Pengiriman</h2>
+    <form id="checkout-form">
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label>Alamat Lengkap</label>
+        <textarea id="address" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Nomor WhatsApp</label>
+        <input type="tel" id="whatsapp" placeholder="08xxxx" required>
+      </div>
+      <button type="submit" class="btn">Buat Pesanan</button>
+    </form>
+  </div>
 
-<button onclick="checkout()">Konfirmasi Pesanan</button>
+  <script type="module">
+    import { ref, push, set } from "https://gstatic.com";
+    import { db } from "./firebase/config.js";
 
-<script>
-function checkout(){
-const user=auth.currentUser;
+    document.getElementById('checkout-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if(cart.length === 0) return alert('Keranjang Anda kosong');
 
-db.ref("orders").push({
-userId:user.uid,
-status:"pending",
-payment:"transfer"
-});
+      const orderData = {
+        customer: {
+          name: document.getElementById('name').value,
+          address: document.getElementById('address').value,
+          whatsapp: document.getElementById('whatsapp').value,
+        },
+        items: cart,
+        status: 'Pending',
+        timestamp: Date.now()
+      };
 
-alert("Pesanan dibuat");
-}
-</script>
+      const ordersRef = ref(db, 'orders');
+      const newOrderRef = push(ordersRef);
+      await set(newOrderRef, orderData);
+      
+      localStorage.removeItem('cart');
+      alert('Pesanan berhasil dibuat!');
+      window.location.href = 'index.html';
+    };
+  </script>
+</body>
+</html>

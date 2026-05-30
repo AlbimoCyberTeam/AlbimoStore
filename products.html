@@ -1,37 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>Products</title>
-<link rel="stylesheet" href="assets/css/style.css">
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-<script src="firebase/config.js"></script>
+  <meta charset="UTF-8">
+  <title>Albimo Store | Semua Produk</title>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+  <nav>
+    <a href="index.html"><h1>Albimo Store</h1></a>
+    <div>
+      <a href="products.html">Produk</a> | 
+      <a href="cart.html">Keranjang (<span id="cart-count">0</span>)</a> | 
+      <a href="auth/login.html" id="auth-link">Login</a>
+    </div>
+  </nav>
 
-<div class="header">
-<h2>Produk</h2>
-<a href="index.html">Home</a>
-</div>
+  <div style="padding: 2rem 5% 0; display: flex; gap: 10px;">
+    <input type="text" id="search-input" placeholder="Cari nama produk..." style="padding: 0.5rem; width: 300px; border-radius: 4px; border: 1px solid #ccc;">
+    <button id="search-btn" class="btn">Cari</button>
+  </div>
 
-<div class="product-list" id="list"></div>
+  <div class="grid" id="all-products-grid">Loading produk...</div>
 
-<script>
-db.ref("products").on("value", snap=>{
-let html="";
-snap.forEach(d=>{
-let p=d.val();
-html+=`
-<div class="card">
-<img src="${p.image}">
-<h3>${p.name}</h3>
-<p>Rp ${p.price}</p>
-<a href="product-detail.html?id=${d.key}">Detail</a>
-</div>`;
-});
-list.innerHTML=html;
-});
-</script>
+  <script type="module">
+    import { ref, get } from "https://gstatic.com";
+    import { db } from "./firebase/config.js";
+    import { updateCartBadge, initAuthNavbar } from "./assets/js/main.js";
 
+    updateCartBadge();
+    initAuthNavbar();
+
+    const grid = document.getElementById('all-products-grid');
+    let localProductsCache = {};
+
+    async function fetchProducts() {
+      const snapshot = await get(ref(db, 'products'));
+      if(snapshot.exists()) {
+        localProductsCache = snapshot.val();
+        renderProducts(localProductsCache);
+      } else {
+        grid.innerHTML = '<p>Produk tidak ditemukan.</p>';
+      }
+    }
+
+    function renderProducts(productsList) {
+      let html = '';
+      for (let id in productsList) {
+        html += `
+          <div class="card">
+            <img src="${productsList[id].image}" alt="${productsList[id].name}">
+            <div class="card-body">
+              <h3>${productsList[id].name}</h3>
+              <p>Rp ${Number(productsList[id].price).toLocaleString('id-ID')}</p>
+              <a href="product-detail.html?id=${id}" class="btn">Lihat Detail</a>
+            </div>
+          </div>`;
+      }
+      grid.innerHTML = html || '<p>Produk tidak cocok.</p>';
+    }
+
+    document.getElementById('search-btn').onclick = () => {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = {};
+      for(let id in localProductsCache) {
+        if(localProductsCache[id].name.toLowerCase().includes(query)) {
+          filtered[id] = localProductsCache[id];
+        }
+      }
+      renderProducts(filtered);
+    };
+
+    fetchProducts();
+  </script>
 </body>
 </html>

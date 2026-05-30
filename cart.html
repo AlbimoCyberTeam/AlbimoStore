@@ -1,16 +1,31 @@
-<h2>Keranjang</h2>
-<div id="cart"></div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Keranjang Belanja</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div style="padding: 5%;">
+    <h2>Keranjang Anda</h2>
+    <div id="cart-items"></div>
+    <br>
+    <a href="checkout.html" class="btn">Lanjut ke Checkout</a>
+  </div>
 
-<script>
-auth.onAuthStateChanged(user=>{
-if(!user) return location="auth/login.html";
-
-db.ref("cart/"+user.uid).on("value", snap=>{
-let html="";
-snap.forEach(c=>{
-html+=`<p>${c.key} - qty ${c.val().qty}</p>`;
-});
-document.getElementById("cart").innerHTML=html;
-});
-});
-</script>
+  <script>
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const container = document.getElementById('cart-items');
+    if(cart.length === 0) {
+      container.innerHTML = '<p>Keranjang kosong.</p>';
+    } else {
+      container.innerHTML = cart.map(item => `
+        <div style="background:white; padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+          <h4>${item.name}</h4>
+          <p>Rp ${Number(item.price).toLocaleString('id-ID')}</p>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
