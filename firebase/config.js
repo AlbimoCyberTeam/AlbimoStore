@@ -3,13 +3,13 @@ import { getDatabase } from "https://gstatic.com";
 import { getAuth } from "https://gstatic.com";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC_mlSh_6OoqgydUbfhFPpXEBAQjcBNNiM",
+  authDomain: "albimostore.firebaseapp.com",
+  databaseURL: "https://albimostore-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId: "albimostore",
+  storageBucket: "albimostore.firebasestorage.app",
+  messagingSenderId: "609426144482",
+  appId: "1:609426144482:web:fa6c9107832ea6ff4d72bb"
 };
 
 const app = initializeApp(firebaseConfig);
