@@ -1,27 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>Register</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="../firebase/config.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albimo Store | Daftar Akun</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
+  <div style="max-width: 400px; margin: 60px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <h2>Daftar Akun Baru</h2>
+    <form id="register-form">
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="reg-name" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" minlength="6" required>
+      </div>
+      <button type="submit" class="btn" style="width: 100%;">Daftar Sekarang</button>
+    </form>
+    <p style="margin-top: 15px; text-align: center; font-size: 14px;">
+      Sudah punya akun? <a href="login.html">Login di sini</a>
+    </p>
+  </div>
 
-<h2>Register</h2>
+  <script type="module">
+    // Menggunakan CDN unpkg yang jauh lebih stabil untuk browser murni tanpa node_modules
+    import { initializeApp } from "https://unpkg.com";
+    import { getAuth, createUserWithEmailAndPassword } from "https://unpkg.com";
+    import { getDatabase, ref, set } from "https://unpkg.com";
+    import { auth, db } from "../firebase/config.js";
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+    const form = document.getElementById('register-form');
 
-<button onclick="reg()">Register</button>
+    form.addEventListener('submit', async (e) => {
+      // Menahan penyegaran halaman dengan sangat ketat di awal baris
+      e.preventDefault(); 
+      
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
 
-<script>
-function reg(){
-auth.createUserWithEmailAndPassword(email.value,password.value)
-.then(()=>location="login.html")
-.catch(e=>alert(e.message));
-}
+      // Mengubah teks tombol agar admin/user tahu proses sedang berjalan
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.innerText;
+      btn.innerText = "Mendaftarkan...";
+      btn.disabled = true;
+
+      try {
+        console.log("Memulai proses registrasi ke Firebase Auth...");
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        console.log("User berhasil dibuat di Auth, menyimpan data ke Database...");
+        // Simpan data peran/role user ke Realtime Database
+        await set(ref(db, 'users/' + user.uid), {
+          name: name,
+          email: email,
+          role: 'customer',
+          createdAt: Date.now()
+        });
+
+        alert('Registrasi Berhasil! Silakan masuk.');
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error("Detail Error Registrasi:", error);
+        // Memunculkan pesan kesalahan spesifik dari Firebase (misal: email sudah terpakai)
+        alert('Gagal Registrasi: ' + error.message);
+      } finally {
+        // Mengembalikan tombol ke kondisi semula jika gagal
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    });
 </script>
-
 </body>
 </html>
