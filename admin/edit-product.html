@@ -1,38 +1,84 @@
-<h2>Edit Produk</h2>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin | Edit Produk</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div style="max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px;">
+    <h2>Perbarui Informasi Produk</h2>
+    <form id="edit-product-form">
+      <div class="form-group">
+        <label>Nama Produk</label>
+        <input type="text" id="edit-name" required>
+      </div>
+      <div class="form-group">
+        <label>Harga (Rp)</label>
+        <input type="number" id="edit-price" required>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea id="edit-desc" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ganti Foto (Kosongkan jika tidak ingin diubah)</label>
+        <input type="file" id="edit-file" accept="image/*">
+      </div>
+      <button type="submit" class="btn" id="edit-submit-btn">Perbarui Data</button>
+    </form>
+  </div>
 
-<input id="name">
-<input id="price">
-<input type="file" id="img">
+  <script type="module">
+    import { ref, get, update } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
+    import { uploadImage } from "../assets/js/cloudinary-upload.js";
 
-<button onclick="update()">Update</button>
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    let currentImageUrl = "";
 
-<script src="../assets/js/cloudinary-upload.js"></script>
+    if(productId) {
+      get(ref(db, `products/${productId}`)).then((snapshot) => {
+        if(snapshot.exists()) {
+          const product = snapshot.val();
+          document.getElementById('edit-name').value = product.name;
+          document.getElementById('edit-price').value = product.price;
+          document.getElementById('edit-desc').value = product.description;
+          currentImageUrl = product.image;
+        }
+      });
+    }
 
-<script>
-const id=new URLSearchParams(location.search).get("id");
+    document.getElementById('edit-product-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('edit-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Memproses...";
 
-db.ref("products/"+id).once("value",snap=>{
-let p=snap.val();
-name.value=p.name;
-price.value=p.price;
-});
+      const fileInput = document.getElementById('edit-file');
+      
+      try {
+        if(fileInput.files.length > 0) {
+          currentImageUrl = await uploadImage(fileInput.files[0]);
+        }
 
-function update(){
-let file=img.files[0];
+        await update(ref(db, `products/${productId}`), {
+          name: document.getElementById('edit-name').value,
+          price: document.getElementById('edit-price').value,
+          description: document.getElementById('edit-desc').value,
+          image: currentImageUrl
+        });
 
-if(file){
-uploadImage(file).then(url=>{
-db.ref("products/"+id).update({
-name:name.value,
-price:price.value,
-image:url
-});
-});
-}else{
-db.ref("products/"+id).update({
-name:name.value,
-price:price.value
-});
-}
-}
-</script>
+        alert('Produk diperbarui!');
+        window.location.href = 'products.html';
+      } catch (error) {
+        alert('Gagal memperbarui data.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Perbarui Data";
+      }
+    };
+  </script>
+</body>
+</html>

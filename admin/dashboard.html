@@ -1,10 +1,53 @@
-<h2>Admin Dashboard</h2>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <nav>
+    <h2>Albimo Admin Panel</h2>
+    <div>
+      <a href="dashboard.html">Pesanan</a> | 
+      <a href="add-product.html">Tambah Produk</a>
+    </div>
+  </nav>
 
-<a href="products.html">Kelola Produk</a>
-<a href="orders.html">Pesanan</a>
+  <div style="padding: 5%;">
+    <h3>Daftar Masuk Pesanan</h3>
+    <div id="orders-list">Loading orders...</div>
+  </div>
 
-<script>
-auth.onAuthStateChanged(user=>{
-if(!user) location="login.html";
-});
-</script>
+  <script type="module">
+    import { ref, get, child } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
+
+    const listContainer = document.getElementById('orders-list');
+
+    get(child(ref(db), 'orders')).then((snapshot) => {
+      if(snapshot.exists()) {
+        const orders = snapshot.val();
+        let html = '';
+        for(let id in orders) {
+          const order = orders[id];
+          html += `
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05)">
+              <h4>Order ID: ${id} (<span style="color:orange;">${order.status}</span>)</h4>
+              <p><strong>Pemesan:</strong> ${order.customer.name} - ${order.customer.whatsapp}</p>
+              <p><strong>Alamat:</strong> ${order.customer.address}</p>
+              <ul>
+                ${order.items.map(item => `<li>${item.name} (Rp ${Number(item.price).toLocaleString()})</li>`).join('')}
+              </ul>
+              <a href="https://wa.me{order.customer.whatsapp}?text=Halo%20${order.customer.name},%20pesanan%20Anda%20sedang%20diproses." target="_blank" class="btn" style="background:#22c55e;">Follow up via WA</a>
+            </div>
+          `;
+        }
+        listContainer.innerHTML = html;
+      } else {
+        listContainer.innerHTML = '<p>Belum ada pesanan masuk.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

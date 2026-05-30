@@ -1,19 +1,54 @@
-<h2>Pesanan</h2>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin | Manajemen Invoice Pesanan</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div style="padding: 5%;">
+    <h3>Manajemen Semua Invoice Masuk</h3>
+    <div id="full-orders-board">Memuat...</div>
+  </div>
 
-<div id="orders"></div>
+  <script type="module">
+    import { ref, get, update } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
 
-<script>
-db.ref("orders").on("value", snap=>{
-let html="";
-snap.forEach(d=>{
-let o=d.val();
-html+=`
-<div>
-User: ${o.userId}<br>
-Status: ${o.status}<br>
-Total: ${o.total}
-</div>`;
-});
-orders.innerHTML=html;
-});
-</script>
+    const board = document.getElementById('full-orders-board');
+
+    async function loadOrders() {
+      const snapshot = await get(ref(db, 'orders'));
+      if(snapshot.exists()) {
+        const orders = snapshot.val();
+        let html = '';
+        for(let id in orders) {
+          html += `
+            <div style="background:white; padding:20px; border-radius:8px; margin-bottom:15px; border-left: 5px solid #2563eb;">
+              <h5>ID Transaksi: ${id}</h5>
+              <p>Status Saat Ini: <strong>${orders[id].status}</strong></p>
+              <button class="btn btn-status" data-id="${id}" data-status="Selesai" style="background:#10b981; padding:3px 8px; font-size:11px;">Tandai Selesai</button>
+              <button class="btn btn-status" data-id="${id}" data-status="Dibatalkan" style="background:#ef4444; padding:3px 8px; font-size:11px;">Batalkan</button>
+            </div>`;
+        }
+        board.innerHTML = html;
+        attachStatusEvents();
+      }
+    }
+
+    function attachStatusEvents() {
+      document.querySelectorAll('.btn-status').forEach(btn => {
+        btn.onclick = async (e) => {
+          const id = e.target.getAttribute('data-id');
+          const nextStatus = e.target.getAttribute('data-status');
+          await update(ref(db, `orders/${id}`), { status: nextStatus });
+          alert('Status pesanan diubah menjadi ' + nextStatus);
+          loadOrders();
+        };
+      });
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

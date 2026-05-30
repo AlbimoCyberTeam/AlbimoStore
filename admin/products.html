@@ -1,19 +1,86 @@
-<h2>Kelola Produk</h2>
-<a href="add-product.html">Tambah</a>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Manajemen Produk</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <nav style="background: #1e293b; color: white;">
+    <h2>Albimo Admin</h2>
+    <div>
+      <a href="dashboard.html" style="color: white; margin-right: 15px;">Pesanan</a>
+      <a href="products.html" style="color: #60a5fa; margin-right: 15px;">Produk</a>
+      <a href="users.html" style="color: white;">User</a>
+    </div>
+  </nav>
 
-<div id="list"></div>
+  <div style="padding: 3% 5%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>Semua Produk Toko</h3>
+      <a href="add-product.html" class="btn" style="background: #10b981;">+ Tambah Produk Baru</a>
+    </div>
 
-<script>
-db.ref("products").on("value", snap=>{
-let html="";
-snap.forEach(d=>{
-let p=d.val();
-html+=`
-<div>
-${p.name} - Rp ${p.price}
-<a href="edit-product.html?id=${d.key}">Edit</a>
-</div>`;
-});
-list.innerHTML=html;
-});
-</script>
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <thead>
+        <tr style="background: #334155; color: white; text-align: left;">
+          <th style="padding: 12px;">Gambar</th>
+          <th style="padding: 12px;">Nama Produk</th>
+          <th style="padding: 12px;">Harga</th>
+          <th style="padding: 12px; text-align: center;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="admin-products-table">
+        <tr><td colspan="4" style="padding: 20px; text-align: center;">Memuat produk...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { ref, get, remove } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
+
+    const tbody = document.getElementById('admin-products-table');
+
+    async function loadAdminProducts() {
+      const snapshot = await get(ref(db, 'products'));
+      if(snapshot.exists()) {
+        const products = snapshot.val();
+        let html = '';
+        for(let id in products) {
+          html += `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 12px;"><img src="${products[id].image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"></td>
+              <td style="padding: 12px; font-weight: bold;">${products[id].name}</td>
+              <td style="padding: 12px;">Rp ${Number(products[id].price).toLocaleString('id-ID')}</td>
+              <td style="padding: 12px; text-align: center;">
+                <a href="edit-product.html?id=${id}" class="btn" style="background:#eab308; padding:4px 10px; font-size:12px;">Edit</a>
+                <button class="btn btn-delete" data-id="${id}" style="background:#ef4444; padding:4px 10px; font-size:12px;">Hapus</button>
+              </td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+        attachDeleteEvents();
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">Belum ada produk yang dijual.</td></tr>';
+      }
+    }
+
+    function attachDeleteEvents() {
+      document.querySelectorAll('.btn-delete').forEach(button => {
+        button.onclick = async (e) => {
+          if(confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+            const id = e.target.getAttribute('data-id');
+            await remove(ref(db, `products/${id}`));
+            alert('Produk berhasil dihapus!');
+            loadAdminProducts();
+          }
+        };
+      });
+    }
+
+    loadAdminProducts();
+  </script>
+</body>
+</html>

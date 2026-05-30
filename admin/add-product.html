@@ -1,22 +1,75 @@
-<input id="name" placeholder="Nama">
-<input id="price" placeholder="Harga">
-<input type="file" id="image">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin | Tambah Produk</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div style="max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px;">
+    <h2>Tambah Produk Baru</h2>
+    <form id="product-form">
+      <div class="form-group">
+        <label>Nama Produk</label>
+        <input type="text" id="prod-name" required>
+      </div>
+      <div class="form-group">
+        <label>Harga (Rp)</label>
+        <input type="number" id="prod-price" required>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea id="prod-desc" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Foto Produk</label>
+        <input type="file" id="prod-file" accept="image/*" required>
+      </div>
+      <button type="submit" class="btn" id="submit-btn">Simpan Produk</button>
+    </form>
+  </div>
 
-<button onclick="add()">Simpan</button>
+  <script type="module">
+    import { ref, push, set } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
+    import { uploadImage } from "../assets/js/cloudinary-upload.js";
 
-<script src="../assets/js/cloudinary-upload.js"></script>
+    document.getElementById('product-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerText = "Mengupload Gambar...";
+      submitBtn.disabled = true;
 
-<script>
-function add(){
-let file=image.files[0];
+      const fileInput = document.getElementById('prod-file');
+      const file = fileInput.files[0];
 
-uploadImage(file).then(url=>{
-db.ref("products").push({
-name:name.value,
-price:price.value,
-image:url
-});
-alert("Produk ditambah");
-});
-}
-</script>
+      try {
+        // 1. Upload ke Cloudinary
+        const imageUrl = await uploadImage(file);
+        
+        // 2. Simpan Data ke Firebase Realtime Database
+        submitBtn.innerText = "Menyimpan Data...";
+        const productsRef = ref(db, 'products');
+        const newProductRef = push(productsRef);
+        
+        await set(newProductRef, {
+          name: document.getElementById('prod-name').value,
+          price: document.getElementById('prod-price').value,
+          description: document.getElementById('prod-desc').value,
+          image: imageUrl,
+          createdAt: Date.now()
+        });
+
+        alert('Produk berhasil ditambahkan!');
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert('Gagal menambahkan produk');
+        console.error(error);
+      } finally {
+        submitBtn.innerText = "Simpan Produk";
+        submitBtn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>

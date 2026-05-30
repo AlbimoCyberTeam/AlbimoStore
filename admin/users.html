@@ -1,14 +1,34 @@
-<h2>Users</h2>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin | Daftar Pengguna</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <div style="padding: 5%;">
+    <h3>Pelanggan Terdaftar</h3>
+    <ul id="users-list-group" style="list-style: none; padding: 0;"></ul>
+  </div>
 
-<div id="users"></div>
+  <script type="module">
+    import { ref, get } from "https://gstatic.com";
+    import { db } from "../firebase/config.js";
 
-<script>
-db.ref("users").on("value", snap=>{
-let html="";
-snap.forEach(u=>{
-let d=u.val();
-html+=`<div>${d.email}</div>`;
-});
-users.innerHTML=html;
-});
-</script>
+    get(ref(db, 'users')).then(snapshot => {
+      if(snapshot.exists()) {
+        const users = snapshot.val();
+        let html = '';
+        for(let uid in users) {
+          if(users[uid].role !== 'admin') {
+            html += `<li style="background:white; padding:12px; margin-bottom:8px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+              <strong>${users[uid].name}</strong> — ${users[uid].email}
+            </li>`;
+          }
+        }
+        document.getElementById('users-list-group').innerHTML = html || 'Belum ada pengguna.';
+      }
+    });
+  </script>
+</body>
+</html>
