@@ -28,22 +28,35 @@
       Sudah punya akun? <a href="login.html">Login di sini</a>
     </p>
   </div>
-
   <script type="module">
-    import { createUserWithEmailAndPassword } from "https://gstatic.com";
-    import { ref, set } from "https://gstatic.com";
+    // Menggunakan CDN unpkg yang jauh lebih stabil untuk browser murni tanpa node_modules
+    import { initializeApp } from "https://unpkg.com";
+    import { getAuth, createUserWithEmailAndPassword } from "https://unpkg.com";
+    import { getDatabase, ref, set } from "https://unpkg.com";
     import { auth, db } from "../firebase/config.js";
 
-    document.getElementById('register-form').onsubmit = async (e) => {
-      e.preventDefault();
+    const form = document.getElementById('register-form');
+
+    form.addEventListener('submit', async (e) => {
+      // Menahan penyegaran halaman dengan sangat ketat di awal baris
+      e.preventDefault(); 
+      
       const name = document.getElementById('reg-name').value;
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
 
+      // Mengubah teks tombol agar admin/user tahu proses sedang berjalan
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.innerText;
+      btn.innerText = "Mendaftarkan...";
+      btn.disabled = true;
+
       try {
+        console.log("Memulai proses registrasi ke Firebase Auth...");
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
+        console.log("User berhasil dibuat di Auth, menyimpan data ke Database...");
         // Simpan data peran/role user ke Realtime Database
         await set(ref(db, 'users/' + user.uid), {
           name: name,
@@ -55,9 +68,15 @@
         alert('Registrasi Berhasil! Silakan masuk.');
         window.location.href = 'login.html';
       } catch (error) {
+        console.error("Detail Error Registrasi:", error);
+        // Memunculkan pesan kesalahan spesifik dari Firebase (misal: email sudah terpakai)
         alert('Gagal Registrasi: ' + error.message);
+      } finally {
+        // Mengembalikan tombol ke kondisi semula jika gagal
+        btn.innerText = originalText;
+        btn.disabled = false;
       }
-    };
-  </script>
+    });
+</script>
 </body>
 </html>
