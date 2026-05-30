@@ -6,7 +6,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 const firebaseConfig = {
   apiKey: "AIzaSyC_mlSh_6OoqgydUbfhFPpXEBAQjcBNNiM",
   authDomain: "albimostore.firebaseapp.com",
-  databaseURL: "https://albimostore-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  databaseURL: "https://albimostore-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "albimostore",
   storageBucket: "albimostore.firebasestorage.app",
   messagingSenderId: "609426144482",
