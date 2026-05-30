@@ -1,39 +1,32 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "../../firebase/config.js";
 
+// Update badge angka belanjaan
 export function updateCartBadge() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const badge = document.getElementById('cart-count');
-
-  if (badge) {
-    badge.innerText = cart.length;
-  }
+  if (badge) badge.innerText = cart.length;
 }
 
+// Logika dinamis tombol navbar Login / Logout
 export function initAuthNavbar() {
   const authLink = document.getElementById('auth-link');
-
   if (!authLink) return;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      authLink.innerText = "Logout";
+      authLink.innerText = "Keluar (Logout)";
       authLink.href = "#";
-
       authLink.onclick = async (e) => {
         e.preventDefault();
-
-        try {
-          await signOut(auth);
-          alert("Berhasil logout");
-          window.location.reload();
-        } catch (error) {
-          console.error(error);
-        }
+        await signOut(auth);
+        alert('Berhasil Keluar.');
+        window.location.reload();
       };
     } else {
       authLink.innerText = "Login";
-      authLink.href = "/auth/login.html";
+      authLink.href = "auth/login.html";
+      authLink.onclick = null;
     }
   });
 }
