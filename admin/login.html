@@ -1,0 +1,14 @@
+<h2>Admin Login</h2>
+
+<input id="email">
+<input id="password" type="password">
+
+<button onclick="login()">Login</button>
+
+<script>
+function login(){
+auth.signInWithEmailAndPassword(email.value,password.value)
+.then(()=>location="dashboard.html")
+.catch(e=>alert(e.message));
+}
+</script>
