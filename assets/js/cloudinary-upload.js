@@ -1,5 +1,5 @@
 const CLOUDINARY_URL = "https://cloudinary.com";
-const CLOUDINARY_UPLOAD_PRESET = "AlbimoStore.com";
+const CLOUDINARY_UPLOAD_PRESET = "albimostore";
 
 export async function uploadImage(file) {
   const formData = new FormData();
