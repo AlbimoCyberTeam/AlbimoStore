@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Albimo Store</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="firebase/config.js"></script>
+</head>
+<body>
+
+<div class="header">
+<h2>Albimo Store</h2>
+<div>
+<a href="auth/login.html">Login</a>
+<a href="cart.html">Cart</a>
+</div>
+</div>
+
+<div class="hero">
+<h2>Belanja Produk Fisik & Digital</h2>
+</div>
+
+<div class="product-list" id="products"></div>
+
+<script>
+db.ref("products").on("value", snap=>{
+  let html="";
+  snap.forEach(d=>{
+    let p=d.val();
+    html+=`
+    <div class="card">
+      <img src="${p.image}">
+      <h3>${p.name}</h3>
+      <p>Rp ${p.price}</p>
+      <button onclick="addCart('${d.key}')">Tambah</button>
+    </div>`;
+  });
+  document.getElementById("products").innerHTML=html;
+});
+
+function addCart(id){
+  const user = auth.currentUser;
+  if(!user) return alert("Login dulu!");
+  db.ref("cart/"+user.uid+"/"+id).set({qty:1});
+  alert("Masuk keranjang");
+}
+</script>
+
+</body>
+</html>

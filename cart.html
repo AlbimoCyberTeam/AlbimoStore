@@ -1,0 +1,16 @@
+<h2>Keranjang</h2>
+<div id="cart"></div>
+
+<script>
+auth.onAuthStateChanged(user=>{
+if(!user) return location="auth/login.html";
+
+db.ref("cart/"+user.uid).on("value", snap=>{
+let html="";
+snap.forEach(c=>{
+html+=`<p>${c.key} - qty ${c.val().qty}</p>`;
+});
+document.getElementById("cart").innerHTML=html;
+});
+});
+</script>

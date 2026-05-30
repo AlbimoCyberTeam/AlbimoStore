@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Detail</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="firebase/config.js"></script>
+</head>
+<body>
+
+<div id="detail"></div>
+
+<script>
+const id = new URLSearchParams(location.search).get("id");
+
+db.ref("products/"+id).once("value", snap=>{
+let p=snap.val();
+
+detail.innerHTML=`
+<div class="card">
+<img src="${p.image}">
+<h2>${p.name}</h2>
+<p>Rp ${p.price}</p>
+<button onclick="add()">Tambah ke Keranjang</button>
+</div>`;
+});
+
+function add(){
+const user=auth.currentUser;
+if(!user) return alert("Login dulu");
+
+db.ref("cart/"+user.uid+"/"+id).set({qty:1});
+alert("Ditambahkan");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<h2>Checkout</h2>
+<p>Transfer ke:</p>
+<p>Bank BNI - 2038992622 - Albimo Store</p>
+
+<button onclick="checkout()">Konfirmasi Pesanan</button>
+
+<script>
+function checkout(){
+const user=auth.currentUser;
+
+db.ref("orders").push({
+userId:user.uid,
+status:"pending",
+payment:"transfer"
+});
+
+alert("Pesanan dibuat");
+}
+</script>

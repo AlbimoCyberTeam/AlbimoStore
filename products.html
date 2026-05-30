@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Products</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="firebase/config.js"></script>
+</head>
+<body>
+
+<div class="header">
+<h2>Produk</h2>
+<a href="index.html">Home</a>
+</div>
+
+<div class="product-list" id="list"></div>
+
+<script>
+db.ref("products").on("value", snap=>{
+let html="";
+snap.forEach(d=>{
+let p=d.val();
+html+=`
+<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p>Rp ${p.price}</p>
+<a href="product-detail.html?id=${d.key}">Detail</a>
+</div>`;
+});
+list.innerHTML=html;
+});
+</script>
+
+</body>
+</html>
