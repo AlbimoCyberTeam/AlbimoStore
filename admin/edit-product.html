@@ -1,0 +1,38 @@
+<h2>Edit Produk</h2>
+
+<input id="name">
+<input id="price">
+<input type="file" id="img">
+
+<button onclick="update()">Update</button>
+
+<script src="../assets/js/cloudinary-upload.js"></script>
+
+<script>
+const id=new URLSearchParams(location.search).get("id");
+
+db.ref("products/"+id).once("value",snap=>{
+let p=snap.val();
+name.value=p.name;
+price.value=p.price;
+});
+
+function update(){
+let file=img.files[0];
+
+if(file){
+uploadImage(file).then(url=>{
+db.ref("products/"+id).update({
+name:name.value,
+price:price.value,
+image:url
+});
+});
+}else{
+db.ref("products/"+id).update({
+name:name.value,
+price:price.value
+});
+}
+}
+</script>

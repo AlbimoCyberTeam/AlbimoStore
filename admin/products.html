@@ -1,0 +1,19 @@
+<h2>Kelola Produk</h2>
+<a href="add-product.html">Tambah</a>
+
+<div id="list"></div>
+
+<script>
+db.ref("products").on("value", snap=>{
+let html="";
+snap.forEach(d=>{
+let p=d.val();
+html+=`
+<div>
+${p.name} - Rp ${p.price}
+<a href="edit-product.html?id=${d.key}">Edit</a>
+</div>`;
+});
+list.innerHTML=html;
+});
+</script>

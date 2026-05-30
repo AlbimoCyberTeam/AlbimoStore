@@ -1,0 +1,22 @@
+<input id="name" placeholder="Nama">
+<input id="price" placeholder="Harga">
+<input type="file" id="image">
+
+<button onclick="add()">Simpan</button>
+
+<script src="../assets/js/cloudinary-upload.js"></script>
+
+<script>
+function add(){
+let file=image.files[0];
+
+uploadImage(file).then(url=>{
+db.ref("products").push({
+name:name.value,
+price:price.value,
+image:url
+});
+alert("Produk ditambah");
+});
+}
+</script>

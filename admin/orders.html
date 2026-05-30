@@ -1,0 +1,19 @@
+<h2>Pesanan</h2>
+
+<div id="orders"></div>
+
+<script>
+db.ref("orders").on("value", snap=>{
+let html="";
+snap.forEach(d=>{
+let o=d.val();
+html+=`
+<div>
+User: ${o.userId}<br>
+Status: ${o.status}<br>
+Total: ${o.total}
+</div>`;
+});
+orders.innerHTML=html;
+});
+</script>
