@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riwayat Pesanan - Albimo Store</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="../firebase/config.js"></script>
+<script src="../auth/auth.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>Riwayat Pesanan</h1>
+    <button onclick="logoutUser()">Logout</button>
+    <a href="../index.html">Belanja Lagi</a>
+  </header>
+
+  <section class="user-orders">
+    <table border="1" width="100%">
+      <thead>
+        <tr>
+          <th>ID Pesanan</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody id="userOrdersTable"></tbody>
+    </table>
+  </section>
+
+  <script>
+    let uid;
+    auth.onAuthStateChanged(user => {
+      if(!user) window.location = "login.html";
+      else uid = user.uid;
+      loadOrders();
+    });
+
+    const userOrdersTable = document.getElementById('userOrdersTable');
+
+    function loadOrders() {
+      db.ref('orders').orderByChild('userId').equalTo(uid).on('value', snap => {
+        userOrdersTable.innerHTML = '';
+        snap.forEach(child => {
+          const order = child.val();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${child.key}</td>
+            <td>Rp ${order.total.toLocaleString()}</td>
+            <td>${order.status}</td>
+            <td><button onclick="showDetail('${child.key}')">Detail</button></td>
+          `;
+          userOrdersTable.appendChild(row);
+        });
+      });
+    }
+
+    function showDetail(orderId) {
+      db.ref('orders/' + orderId + '/items').once('value', snap => {
+        let detail = '';
+        snap.forEach(item => {
+          db.ref('products/' + item.key).once('value', pSnap => {
+            const prod = pSnap.val();
+            detail += `${prod.name} x ${item.val().qty}\n`;
+            alert("Detail Pesanan:\n" + detail);
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>
