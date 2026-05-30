@@ -31,9 +31,9 @@
 
   <script type="module">
     // Menggunakan CDN unpkg yang jauh lebih stabil untuk browser murni tanpa node_modules
-    import { initializeApp } from "https://unpkg.com";
-    import { getAuth, createUserWithEmailAndPassword } from "https://unpkg.com";
-    import { getDatabase, ref, set } from "https://unpkg.com";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import { auth, db } from "../firebase/config.js";
 
     const form = document.getElementById('register-form');

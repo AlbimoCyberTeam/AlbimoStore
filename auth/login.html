@@ -27,8 +27,8 @@
   </div>
 
   <script type="module">
-    import { signInWithEmailAndPassword } from "https://gstatic.com";
-    import { ref, get } from "https://gstatic.com";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import { auth, db } from "../firebase/config.js";
 
     document.getElementById('login-form').onsubmit = async (e) => {
