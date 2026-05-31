@@ -1,6 +1,5 @@
 const CLOUDINARY_URL =
-  "https://api.cloudinary.com/v1_1/albimostore/image/upload";
-
+  "https://api.cloudinary.com/v1_1/CLOUD_NAME/image/upload";
 const CLOUDINARY_UPLOAD_PRESET = "BlackDragonSkull";
 
 export async function uploadImage(file) {
@@ -23,7 +22,6 @@ export async function uploadImage(file) {
 
     return data.secure_url;
   } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    throw error;
+    console.error(error);
+    alert("Gagal menambahkan produk: " + error.message);
   }
-}
