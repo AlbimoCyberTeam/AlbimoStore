@@ -1,7 +1,7 @@
 const CLOUDINARY_URL =
   "https://api.cloudinary.com/v1_1/albimostore/image/upload";
 
-const CLOUDINARY_UPLOAD_PRESET = "albimostore";
+const CLOUDINARY_UPLOAD_PRESET = "BlackDragonSkull";
 
 export async function uploadImage(file) {
   const formData = new FormData();
