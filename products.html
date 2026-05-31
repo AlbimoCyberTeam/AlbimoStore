@@ -1,17 +1,43 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Produk</title></head><body><table><tbody id="admin-products-table"></tbody></table><script type="module">
-import { ref,get,remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { db } from "../firebase/config.js";
-const tbody=document.getElementById("admin-products-table");
-async function loadAdminProducts(){
- try{
-  const snap=await get(ref(db,"products"));
-  if(!snap.exists()){tbody.innerHTML='<tr><td>Belum ada produk</td></tr>';return;}
-  let html='';
-  const products=snap.val();
-  for(const id in products){html+=`<tr><td>${products[id].name}</td><td><button class="btn-delete" data-id="${id}">Hapus</button></td></tr>`;}
-  tbody.innerHTML=html;
-  document.querySelectorAll(".btn-delete").forEach(btn=>btn.onclick=async()=>{await remove(ref(db,`products/${btn.dataset.id}`));loadAdminProducts();});
- }catch(e){console.error(e);}
-}
-loadAdminProducts();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Detail Produk</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div style="padding: 5%; display: flex; gap: 2rem;" id="detail-container"></div>
+
+  <script type="module">
+    import { ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { db } from "./firebase/config.js";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if(productId) {
+      get(child(ref(db), `products/${productId}`)).then((snapshot) => {
+        if(snapshot.exists()) {
+          const product = snapshot.val();
+          document.getElementById('detail-container').innerHTML = `
+            <img src="${product.image}" style="width:400px; max-width:100%; border-radius:8px;">
+            <div>
+              <h2>${product.name}</h2>
+              <h3 style="color:#2563eb;">Rp ${Number(product.price).toLocaleString('id-ID')}</h3>
+              <p>${product.description}</p>
+              <button class="btn" id="add-to-cart">Tambah ke Keranjang</button>
+            </div>
+          `;
+          
+          document.getElementById('add-to-cart').onclick = () => {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push({id: productId, ...product});
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('Produk ditambahkan ke keranjang!');
+          };
+        }
+      });
+    }
+  </script>
+</body>
+</html>
