@@ -68,8 +68,13 @@ if (file.size > 2 * 1024 * 1024) { // Batasi maksimal 2MB
         alert('Produk berhasil ditambahkan!');
         window.location.href = 'dashboard.html';
       } catch (error) {
-        alert('Gagal menambahkan produk');
-        console.error(error);
+  console.error(error);
+
+  alert(
+    'Gagal menambahkan produk:\n' +
+    (error.message || JSON.stringify(error))
+  );
+      }
       } finally {
         submitBtn.innerText = "Simpan Produk";
         submitBtn.disabled = false;
