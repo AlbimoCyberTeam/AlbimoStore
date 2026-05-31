@@ -43,6 +43,13 @@
       const fileInput = document.getElementById('prod-file');
 const file = fileInput.files[0];
 
+if (!file) {
+  alert("Pilih gambar terlebih dahulu.");
+  submitBtn.disabled = false;
+  submitBtn.innerText = "Simpan Produk";
+  return;
+}
+
 if (file.size > 2 * 1024 * 1024) { // Batasi maksimal 2MB
   alert("Ukuran gambar terlalu besar! Maksimal 2MB.");
   return;
