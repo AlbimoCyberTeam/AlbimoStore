@@ -6,58 +6,75 @@
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-<div style="max-width:600px;margin:50px auto;padding:20px;background:white;border-radius:8px;">
-<h2>Tambah Produk Baru</h2>
-<form id="product-form">
-<input type="text" id="prod-name" placeholder="Nama Produk" required><br><br>
-<input type="number" id="prod-price" placeholder="Harga" required><br><br>
-<textarea id="prod-desc" placeholder="Deskripsi" required></textarea><br><br>
-<input type="file" id="prod-file" accept="image/*" required><br><br>
-<button type="submit" class="btn" id="submit-btn">Simpan Produk</button>
-</form>
-</div>
+  <div style="max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px;">
+    <h2>Tambah Produk Baru</h2>
+    <form id="product-form">
+      <div class="form-group">
+        <label>Nama Produk</label>
+        <input type="text" id="prod-name" required>
+      </div>
+      <div class="form-group">
+        <label>Harga (Rp)</label>
+        <input type="number" id="prod-price" required>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea id="prod-desc" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Foto Produk</label>
+        <input type="file" id="prod-file" accept="image/*" required>
+      </div>
+      <button type="submit" class="btn" id="submit-btn">Simpan Produk</button>
+    </form>
+  </div>
 
-<script type="module">
-import { ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { db } from "../firebase/config.js";
-import { uploadImage } from "../assets/js/cloudinary-upload.js";
+  <script type="module">
+    import { ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { db } from "../firebase/config.js";
+    import { uploadImage } from "../assets/js/cloudinary-upload.js";
 
-document.getElementById("product-form").onsubmit = async (e) => {
- e.preventDefault();
- const submitBtn = document.getElementById("submit-btn");
- submitBtn.disabled = true;
+    document.getElementById('product-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerText = "Mengupload Gambar...";
+      submitBtn.disabled = true;
 
- try {
-   const file = document.getElementById("prod-file").files[0];
-   if (!file) throw new Error("Pilih gambar terlebih dahulu");
+      const fileInput = document.getElementById('prod-file');
+const file = fileInput.files[0];
 
-   if (file.size > 2 * 1024 * 1024) {
-     throw new Error("Ukuran gambar maksimal 2MB");
-   }
+if (file.size > 2 * 1024 * 1024) { // Batasi maksimal 2MB
+  alert("Ukuran gambar terlalu besar! Maksimal 2MB.");
+  return;
+}
 
-   submitBtn.innerText = "Mengupload Gambar...";
-   const imageUrl = await uploadImage(file);
+      try {
+        // 1. Upload ke Cloudinary
+        const imageUrl = await uploadImage(file);
+        
+        // 2. Simpan Data ke Firebase Realtime Database
+        submitBtn.innerText = "Menyimpan Data...";
+        const productsRef = ref(db, 'products');
+        const newProductRef = push(productsRef);
+        
+        await set(newProductRef, {
+          name: document.getElementById('prod-name').value,
+          price: document.getElementById('prod-price').value,
+          description: document.getElementById('prod-desc').value,
+          image: imageUrl,
+          createdAt: Date.now()
+        });
 
-   submitBtn.innerText = "Menyimpan Data...";
-   const newRef = push(ref(db, "products"));
-
-   await set(newRef, {
-      name: document.getElementById("prod-name").value.trim(),
-      price: Number(document.getElementById("prod-price").value),
-      description: document.getElementById("prod-desc").value.trim(),
-      image: imageUrl,
-      createdAt: Date.now()
-   });
-
-   alert("Produk berhasil ditambahkan");
- } catch(err) {
-   alert(err.message || "Terjadi kesalahan");
-   console.error(err);
- } finally {
-   submitBtn.disabled = false;
-   submitBtn.innerText = "Simpan Produk";
- }
-};
-</script>
+        alert('Produk berhasil ditambahkan!');
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        alert('Gagal menambahkan produk');
+        console.error(error);
+      } finally {
+        submitBtn.innerText = "Simpan Produk";
+        submitBtn.disabled = false;
+      }
+    };
+  </script>
 </body>
 </html>
