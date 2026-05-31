@@ -40,10 +40,14 @@
       submitBtn.innerText = "Mengupload Gambar...";
       submitBtn.disabled = true;
 
-      const fileInput = document.getElementById('prod-file');
-const file = fileInput.files[0];
+      const file = fileInput.files[0];
 
-if (file.size > 2 * 1024 * 1024) { // Batasi maksimal 2MB
+if (!file) {
+  alert("Silakan pilih gambar produk.");
+  return;
+}
+
+if (file.size > 2 * 1024 * 1024) {
   alert("Ukuran gambar terlalu besar! Maksimal 2MB.");
   return;
 }
