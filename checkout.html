@@ -1,32 +1,63 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Checkout</title></head>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Checkout</title>
+</head>
 <body>
 <h2>Checkout Pesanan</h2>
+
 <form id="checkout-form">
 <input id="name" placeholder="Nama" required><br><br>
 <textarea id="address" placeholder="Alamat" required></textarea><br><br>
 <input id="whatsapp" placeholder="WhatsApp" required><br><br>
 <button type="submit">Checkout</button>
 </form>
+
 <script type="module">
 import { auth, db } from './config.js';
-import { ref,push,set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { ref, push, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-document.getElementById('checkout-form').addEventListener('submit', async(e)=>{
-e.preventDefault();
-const cart=JSON.parse(localStorage.getItem('cart')||'[]');
-const total=cart.reduce((a,b)=>a+Number(b.price||0),0);
+document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-const order={
-userId: auth.currentUser?.uid || 'guest',
-customer:{
-name:name.value,address:address.value,whatsapp:whatsapp.value
-},
-items:cart,total,status:'Pending',createdAt:Date.now()
-};
+  try {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-await set(push(ref(db,'orders')),order);
-localStorage.removeItem('cart');
-alert('Pesanan berhasil dibuat');
-location.href='user/orders.html';
+    if (cart.length === 0) {
+      alert('Keranjang kosong');
+      return;
+    }
+
+    const total = cart.reduce((a,b)=>a+Number(b.price||0),0);
+
+    const order = {
+      userId: auth.currentUser?.uid || 'guest',
+      customer: {
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        whatsapp: document.getElementById('whatsapp').value
+      },
+      items: cart,
+      total: total,
+      status: 'Pending',
+      createdAt: Date.now()
+    };
+
+    const orderRef = push(ref(db,'orders'));
+    await set(orderRef, order);
+
+    localStorage.removeItem('cart');
+
+    alert('Pesanan berhasil dibuat');
+
+    location.href = 'user/orders.html';
+
+  } catch(err) {
+    console.error(err);
+    alert('Error: ' + err.message);
+  }
 });
-</script></body></html>
+</script>
+</body>
+</html>
