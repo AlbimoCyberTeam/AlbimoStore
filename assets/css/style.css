@@ -1,19 +1,22 @@
-/* Tema Utama Albimo Store Pro: Biru Modern */
-@import url('https://googleapis.com');
 
-:root {
-  --blue-primary: #0284c7;    /* Sky Blue Pro */
-  --blue-dark: #0c4a6e;       /* Deep Ocean Blue */
-  --blue-light: #e0f2fe;      /* Soft Ice Blue */
-  --bg-slate: #f8fafc;
+:root{
+ --blue-primary:#2563eb;
+ --blue-dark:#1e3a8a;
+ --blue-light:#dbeafe;
+ --bg-main:#eff6ff;
 }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-slate);
+*{box-sizing:border-box}
+body{
+ font-family:Inter,Arial,sans-serif;
+ background:linear-gradient(180deg,var(--bg-main),#ffffff);
+ color:#1f2937;
+ margin:0;
+ min-height:100vh;
 }
-
-/* Custom scrollbar bertema biru */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-slate); }
-::-webkit-scrollbar-thumb { background: var(--blue-primary); border-radius: 4px; }
+.top-bg{background:linear-gradient(135deg,var(--blue-dark),var(--blue-primary))}
+.card,.bg-white{
+ border-radius:12px;
+}
+a{transition:.2s}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-thumb{background:var(--blue-primary);border-radius:10px}
