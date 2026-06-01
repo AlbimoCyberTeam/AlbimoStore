@@ -1,7 +1,5 @@
-// GANTI YOUR_CLOUD_NAME dengan Cloud Name Cloudinary Anda
 const CLOUDINARY_URL =
-  "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
-
+  "https://api.cloudinary.com/v1_1/diutiwqz1/image/upload";
 const CLOUDINARY_UPLOAD_PRESET = "BlackDragonSkull";
 
 export async function uploadImage(file) {
@@ -20,6 +18,10 @@ export async function uploadImage(file) {
 
   if (!response.ok) {
     throw new Error(data?.error?.message || "Upload Cloudinary gagal");
+  }
+
+  if (!data.secure_url) {
+    throw new Error("URL gambar tidak diterima dari Cloudinary");
   }
 
   return data.secure_url;
