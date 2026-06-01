@@ -1,58 +1,32 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Checkout</title>
-  <link rel="stylesheet" href="assets/css/style.css">
-</head>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Checkout</title></head>
 <body>
-  <div style="max-width: 500px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px;">
-    <h2>Form Pengiriman</h2>
-    <form id="checkout-form">
-      <div class="form-group">
-        <label>Nama Lengkap</label>
-        <input type="text" id="name" required>
-      </div>
-      <div class="form-group">
-        <label>Alamat Lengkap</label>
-        <textarea id="address" required></textarea>
-      </div>
-      <div class="form-group">
-        <label>Nomor WhatsApp</label>
-        <input type="tel" id="whatsapp" placeholder="08xxxx" required>
-      </div>
-      <button type="submit" class="btn">Buat Pesanan</button>
-    </form>
-  </div>
+<h2>Checkout Pesanan</h2>
+<form id="checkout-form">
+<input id="name" placeholder="Nama" required><br><br>
+<textarea id="address" placeholder="Alamat" required></textarea><br><br>
+<input id="whatsapp" placeholder="WhatsApp" required><br><br>
+<button type="submit">Checkout</button>
+</form>
+<script type="module">
+import { auth, db } from './firebase/config.js';
+import { ref,push,set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-  <script type="module">
-    import { ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "./firebase/config.js";
+document.getElementById('checkout-form').addEventListener('submit', async(e)=>{
+e.preventDefault();
+const cart=JSON.parse(localStorage.getItem('cart')||'[]');
+const total=cart.reduce((a,b)=>a+Number(b.price||0),0);
 
-    document.getElementById('checkout-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if(cart.length === 0) return alert('Keranjang Anda kosong');
+const order={
+userId: auth.currentUser?.uid || 'guest',
+customer:{
+name:name.value,address:address.value,whatsapp:whatsapp.value
+},
+items:cart,total,status:'Pending',createdAt:Date.now()
+};
 
-      const orderData = {
-        customer: {
-          name: document.getElementById('name').value,
-          address: document.getElementById('address').value,
-          whatsapp: document.getElementById('whatsapp').value,
-        },
-        items: cart,
-        status: 'Pending',
-        timestamp: Date.now()
-      };
-
-      const ordersRef = ref(db, 'orders');
-      const newOrderRef = push(ordersRef);
-      await set(newOrderRef, orderData);
-      
-      localStorage.removeItem('cart');
-      alert('Pesanan berhasil dibuat!');
-      window.location.href = 'index.html';
-    };
-  </script>
-</body>
-</html>
+await set(push(ref(db,'orders')),order);
+localStorage.removeItem('cart');
+alert('Pesanan berhasil dibuat');
+location.href='user/orders.html';
+});
+</script></body></html>
