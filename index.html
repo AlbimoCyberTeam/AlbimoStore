@@ -2,72 +2,50 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Albimo Store | Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albimo Store | Marketplace Premium</title>
+  <script src="https://tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
-
-  <nav>
-    <a href="index.html"><h1>Albimo Store</h1></a>
-    <div>
-      <a href="products.html">Produk</a> | 
-      <a href="cart.html">Keranjang (<span id="cart-count">0</span>)</a> | <a href="user/orders.html">Pesanan Saya</a> | 
-      <a href="auth/login.html" id="auth-link">Login</a>
+<body class="bg-slate-50">
+  <!-- Navbar Utama Berwarna Biru -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold tracking-wider">ALBIMO <span class="text-sky-300">STORE</span></a>
+      <div class="flex items-center space-x-6">
+        <a href="products.html" class="hover:text-sky-200 transition">Produk</a>
+        <a href="cart.html" class="relative hover:text-sky-200 transition">
+          🛒 <span id="cart-count" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        </a>
+        <a href="auth/login.html" class="bg-sky-600 hover:bg-sky-500 px-4 py-2 rounded-md font-medium transition">Masuk</a>
+      </div>
     </div>
-  <span id="user-info" style="margin-left:10px"></span></nav>
+  </nav>
 
-  <h2 style="padding: 2rem 5% 0;">Produk Terbaru</h2>
-  <div class="grid" id="latest-products"></div>
+  <!-- Hero Section -->
+  <header class="bg-gradient-to-r top-bg from-sky-800 to-sky-600 text-white py-20 px-6 text-center">
+    <h1 class="text-4xl md:text-6xl font-bold mb-4">Belanja Gadget Pro di Albimo</h1>
+    <p class="text-sky-100 text-lg mb-8">Platform marketplace terpercaya dengan kualitas premium dan pelayanan kilat.</p>
+    <a href="products.html" class="bg-white text-sky-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-sky-50 transition">Jelajahi Produk</a>
+  </header>
 
-  <script type="module">
-    import { ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "./firebase/config.js";
+  <!-- Container Utama -->
+  <main class="container mx-auto px-6 py-12">
+    <h2 class="text-2xl font-bold text-slate-800 mb-8 border-l-4 border-sky-600 pl-3">Produk Unggulan</h2>
+    <div id="featured-products" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <!-- Dummy Card Produk -->
+      <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden border border-slate-100">
+        <img src="https://unsplash.com" alt="Produk" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <span class="text-xs font-semibold text-sky-600 bg-sky-50 px-2 py-1 rounded">Elektronik</span>
+          <h3 class="font-bold text-slate-800 mt-2 text-lg truncate">Albimo Headphone Pro X</h3>
+          <p class="text-sky-600 font-bold mt-1">Rp 1.250.000</p>
+          <a href="product-detail.html" class="block text-center mt-4 bg-sky-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition">Lihat Detail</a>
+        </div>
+      </div>
+    </div>
+  </main>
 
-    const container = document.getElementById('latest-products');
-    
-    get(child(ref(db), 'products')).then((snapshot) => {
-      if (snapshot.exists()) {
-        const products = snapshot.val();
-        let html = '';
-        for (let id in products) {
-          html += `
-            <div class="card">
-              <img src="${products[id].image}" alt="${products[id].name}">
-              <div class="card-body">
-                <h3>${products[id].name}</h3>
-                <p>Rp ${Number(products[id].price).toLocaleString('id-ID')}</p>
-                <a href="product-detail.html?id=${id}" class="btn">Detail</a>
-              </div>
-            </div>`;
-        }
-        container.innerHTML = html;
-      } else {
-        container.innerHTML = '<p>Belum ada produk.</p>';
-      }
-    });
-  </script>
-
-<script type="module">
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const auth=getAuth();
-onAuthStateChanged(auth,(user)=>{
- const el=document.getElementById('user-info');
- if(!el) return;
-
- if(user){
-   const name=user.displayName || user.email || 'User';
-   el.innerHTML=`<span>👤 ${name}</span> |
-   <a href="#" id="logout-btn">Logout</a>`;
-
-   document.getElementById('logout-btn').onclick=async(e)=>{
-      e.preventDefault();
-      await signOut(auth);
-      location.reload();
-   };
- }else{ el.innerHTML=''; }
-});
-</script>
-
+  <script src="assets/js/main.js"></script>
 </body>
 </html>

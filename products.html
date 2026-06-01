@@ -1,43 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Detail Produk</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8"><title>Semua Produk | Albimo Store</title>
+  <script src="https://tailwindcss.com"></script>
 </head>
-<body>
-  <div style="padding: 5%; display: flex; gap: 2rem;" id="detail-container"></div>
-
-  <script type="module">
-    import { ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "./firebase/config.js";
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-
-    if(productId) {
-      get(child(ref(db), `products/${productId}`)).then((snapshot) => {
-        if(snapshot.exists()) {
-          const product = snapshot.val();
-          document.getElementById('detail-container').innerHTML = `
-            <img src="${product.image}" style="width:400px; max-width:100%; border-radius:8px;">
-            <div>
-              <h2>${product.name}</h2>
-              <h3 style="color:#2563eb;">Rp ${Number(product.price).toLocaleString('id-ID')}</h3>
-              <p>${product.description}</p>
-              <button class="btn" id="add-to-cart">Tambah ke Keranjang</button>
-            </div>
-          `;
-          
-          document.getElementById('add-to-cart').onclick = () => {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.push({id: productId, ...product});
-            localStorage.setItem('cart', JSON.stringify(cart));
-            alert('Produk ditambahkan ke keranjang!');
-          };
-        }
-      });
-    }
-  </script>
+<body class="bg-slate-50">
+  <div class="container mx-auto px-6 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <h1 class="text-3xl font-bold text-slate-800">Katalog Produk</h1>
+      <input type="text" placeholder="Cari barang impian Anda..." class="w-full md:w-80 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="product-list">
+      <!-- Produk di-render dinamis dari DB/Firebase -->
+    </div>
+  </div>
 </body>
 </html>

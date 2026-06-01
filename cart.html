@@ -2,33 +2,68 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Keranjang Belanja</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Albimo Store</title>
+  <script src="https://tailwindcss.com"></script>
 </head>
-<body>
-  <div style="padding: 5%;">
-    <h2>Keranjang Anda</h2>
-    <div id="cart-items"></div>
-    <br>
-    <a href="checkout.html" class="btn">🛒 Checkout Sekarang</a>
+<body class="bg-slate-50 py-12 px-4">
+  <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+    <div class="text-center mb-8">
+      <span class="text-4xl">🎉</span>
+      <h1 class="text-2xl font-bold text-slate-800 mt-2">Pesanan Berhasil Dibuat!</h1>
+      <p class="text-slate-500 text-sm">Silakan selesaikan pembayaran tagihan Anda di bawah ini.</p>
+    </div>
+
+    <!-- Ringkasan Produk Terbeli -->
+    <div class="border-t border-b py-4 my-6 space-y-3" id="checkout-summary">
+      <!-- Data belanjaan terakhir akan muncul otomatis di sini -->
+    </div>
+
+    <!-- Informasi Rekening Pembayaran (Tema Biru) -->
+    <div class="bg-sky-50 rounded-xl p-5 border border-sky-100 mb-6">
+      <h3 class="font-semibold text-sky-800 text-sm uppercase tracking-wider mb-3">Metode Transfer Bank (Manual)</h3>
+      <div class="space-y-2 text-slate-700 text-sm">
+        <p>🏦 <strong>Bank BCA:</strong> 123-4567-890 (a/n Albimo Store)</p>
+        <p>💵 <strong>Total Tagihan:</strong> <span class="text-lg font-bold text-sky-600" id="checkout-total">Rp 0</span></p>
+      </div>
+    </div>
+
+    <div class="flex gap-4">
+      <a href="index.html" class="w-1/2 text-center bg-slate-100 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-200 transition">
+        Kembali Belanja
+      </a>
+      <button onclick="alert('Konfirmasi pembayaran Anda telah dikirim ke Admin!')" class="w-1/2 bg-sky-600 text-white font-medium py-3 rounded-xl hover:bg-sky-700 transition shadow-md shadow-sky-100">
+        Konfirmasi Bayar
+      </button>
+    </div>
   </div>
 
   <script>
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const container = document.getElementById('cart-items');
-    if(cart.length === 0) {
-      container.innerHTML = '<p>Keranjang kosong.</p>';
-    } else {
-      container.innerHTML = cart.map(item => `
-        <div style="background:white; padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
-          <h4>${item.name}</h4>
-          <p>Rp ${Number(item.price).toLocaleString('id-ID')}</p>
-        </div>
-      `).join('');
-    }
-  
-container.innerHTML += '<hr><button id="clearCart">Kosongkan Keranjang</button>';
-document.addEventListener('click',(e)=>{if(e.target.id==='clearCart'){localStorage.removeItem('cart');location.reload();}});
-</script>
+    // Skrip otomatis membaca transaksi terakhir yang disimpan di LocalStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const lastOrder = JSON.parse(localStorage.getItem('albimo_last_order')) || [];
+      const summaryContainer = document.getElementById('checkout-summary');
+      const totalContainer = document.getElementById('checkout-total');
+      
+      let totalHarga = 0;
+      
+      if (lastOrder.length === 0) {
+        summaryContainer.innerHTML = '<p class="text-slate-400 text-center text-sm py-4">Tidak ada riwayat transaksi aktif.</p>';
+      } else {
+        summaryContainer.innerHTML = '';
+        lastOrder.forEach(item => {
+          totalHarga += item.price * item.quantity;
+          summaryContainer.innerHTML += `
+            <div class="flex justify-between text-sm text-slate-700">
+              <span>${item.name} <strong class="text-slate-400">x${item.quantity}</strong></span>
+              <span class="font-semibold">${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.price * item.quantity)}</span>
+            </div>
+          `;
+        });
+      }
+      
+      totalContainer.innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalHarga);
+    });
+  </script>
 </body>
 </html>

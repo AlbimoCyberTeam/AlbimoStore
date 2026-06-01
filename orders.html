@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan Saya | Albimo Store</title>
+  <script src="https://tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-50">
+
+  <!-- Navbar Utama -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold tracking-wider">ALBIMO <span class="text-sky-300">STORE</span></a>
+      <div class="flex items-center space-x-6">
+        <a href="products.html" class="hover:text-sky-200 transition">Produk</a>
+        <a href="orders.html" class="text-sky-200 border-b-2 border-sky-300 pb-1 font-medium">Pesanan Saya</a>
+        <a href="cart.html" class="hover:text-sky-200 transition">🛒</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Konten Utama -->
+  <main class="container mx-auto max-w-4xl px-6 py-12">
+    <h1 class="text-2xl font-bold text-slate-800 mb-6 border-l-4 border-sky-600 pl-3">Riwayat Pesanan Anda</h1>
+    
+    <!-- Wadah List Pesanan -->
+    <div id="user-orders-list" class="space-y-4">
+      <!-- Data pesanan akan muncul otomatis di sini via JavaScript -->
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mengambil data histori transaksi dari database lokal (LocalStorage)
+      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
+      const ordersContainer = document.getElementById('user-orders-list');
+
+      if (orderHistory.length === 0) {
+        ordersContainer.innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm p-8 text-center border border-slate-100">
+            <span class="text-4xl">📦</span>
+            <p class="text-slate-500 mt-2">Anda belum memiliki riwayat pesanan aktif.</p>
+            <a href="products.html" class="inline-block mt-4 bg-sky-600 text-white text-sm px-5 py-2 rounded-lg hover:bg-sky-700 transition">Mulai Belanja</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Render daftar pesanan (diurutkan dari yang paling baru)
+      ordersContainer.innerHTML = '';
+      orderHistory.reverse().forEach(order => {
+        let itemsHtml = '';
+        order.items.forEach(item => {
+          itemsHtml += `
+            <div class="flex justify-between items-center text-sm py-2 border-b border-slate-50 last:border-0">
+              <span class="text-slate-700">${item.name} <strong class="text-slate-400">x${item.quantity}</strong></span>
+              <span class="font-medium text-slate-600">${formatRupiah(item.price * item.quantity)}</span>
+            </div>
+          `;
+        });
+
+        ordersContainer.innerHTML += `
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 hover:border-sky-100 transition">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+              <div>
+                <p class="text-xs text-slate-400 font-mono">ID Pesanan: ${order.orderId}</p>
+                <p class="text-xs text-slate-400">${order.date}</p>
+              </div>
+              <span class="text-xs px-3 py-1 rounded-full font-medium ${
+                order.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+              }">${order.status}</span>
+            </div>
+            
+            <div class="space-y-1 mb-4">
+              ${itemsHtml}
+            </div>
+
+            <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+              <span class="text-sm font-semibold text-slate-800">Total Pembayaran:</span>
+              <span class="text-lg font-bold text-sky-600">${formatRupiah(order.total)}</span>
+            </div>
+          </div>
+        `;
+      });
+    });
+
+    function formatRupiah(angka) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    }
+  </script>
+</body>
+</html>
