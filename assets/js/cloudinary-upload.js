@@ -1,6 +1,6 @@
 const CLOUDINARY_URL =
   "https://api.cloudinary.com/v1_1/diutiwqz1/image/upload";
-const CLOUDINARY_UPLOAD_PRESET = "BlackDragonSkull";
+const CLOUDINARY_UPLOAD_PRESET = "albimostore";
 
 export async function uploadImage(file) {
   if (!file) throw new Error("File gambar belum dipilih");
