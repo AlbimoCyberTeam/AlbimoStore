@@ -3,7 +3,7 @@
 <title>Detail Produk</title>
 <link rel="stylesheet" href="assets/css/style.css">
 </head><body>
-<div style="padding:20px" id="detail-container"></div>
+<div style="padding:20px"><a href="cart.html">🛒 Lihat Keranjang</a><div id="detail-container"></div></div>
 <script type="module">
 import { ref,get,child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { db } from "./firebase/config.js";
@@ -16,7 +16,7 @@ if(id){
  if(snap.exists()){
    const p=snap.val();
    box.innerHTML=`
-   <h2>${p.name||"Produk"}</h2>
+   ${p.image?`<img src="${p.image}" style="max-width:250px">`:""}<h2>${p.name||"Produk"}</h2>
    <p>${p.description||""}</p>
    <h3>Rp ${Number(p.price||0).toLocaleString("id-ID")}</h3>
    <button id="addCart">Tambah ke Keranjang</button>

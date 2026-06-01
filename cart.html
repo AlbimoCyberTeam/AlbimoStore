@@ -26,6 +26,9 @@
         </div>
       `).join('');
     }
-  </script>
+  
+container.innerHTML += '<hr><button id="clearCart">Kosongkan Keranjang</button>';
+document.addEventListener('click',(e)=>{if(e.target.id==='clearCart'){localStorage.removeItem('cart');location.reload();}});
+</script>
 </body>
 </html>

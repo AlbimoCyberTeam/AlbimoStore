@@ -65,9 +65,7 @@ onAuthStateChanged(auth,(user)=>{
       await signOut(auth);
       location.reload();
    };
- }else{
-   el.innerHTML='<a href="login.html">Login</a>';
- }
+ }else{ el.innerHTML=''; }
 });
 </script>
 
