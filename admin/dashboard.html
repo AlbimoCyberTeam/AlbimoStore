@@ -2,60 +2,174 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin | Albimo Store</title>
+  <script src="https://tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body style="background-color: #fdfafb;">
-  <nav style="background: #8b0000; color: white;">
-    <h2>Albimo Admin Panel</h2>
-    <div>
-      <a href="dashboard.html" style="color: white; font-weight: bold; border-bottom: 2px solid white; padding-bottom: 5px;">Pesanan</a> | 
-      <a href="products.html" style="color: rgba(255,255,255,0.8);">Produk</a> |
-      <a href="users.html" style="color: rgba(255,255,255,0.8);">User</a>
+<body class="bg-slate-100 flex">
+
+  <!-- Sidebar Berwarna Biru Gelap Profesional -->
+  <aside class="w-64 bg-slate-900 text-slate-300 min-h-screen p-6 sticky top-0 h-screen">
+    <div class="text-white text-xl font-bold tracking-wider mb-10 border-b border-slate-800 pb-4">ALBIMO ADMIN</div>
+    <nav class="space-y-2">
+      <a href="dashboard.html" class="block px-4 py-3 bg-sky-700 text-white rounded-xl font-medium">📊 Dashboard</a>
+      <a href="products.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📦 Produk</a>
+      <a href="orders.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">🧾 Pesanan</a>
+      <a href="users.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">👥 Pengguna</a>
+    </nav>
+  </aside>
+
+  <!-- Panel Konten Utama -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800">Ringkasan Toko</h1>
+        <p class="text-sm text-slate-500 mt-1">Pantau statistik penjualan, pendapatan, dan aktivitas inventaris secara realtime.</p>
+      </div>
+      <span class="text-sm bg-emerald-100 text-emerald-800 px-4 py-2 rounded-xl font-semibold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktif
+      </span>
+    </header>
+    
+    <!-- Statistik Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+      <!-- Total Pendapatan (Hanya menghitung order bersatutus Selesai) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Total Pendapatan</h3>
+        <p id="dash-revenue" class="text-2xl font-bold text-slate-800 mt-2">Rp 0</p>
+        <span class="text-[11px] text-emerald-600 font-medium mt-1 block">Dari transaksi sukses</span>
+      </div>
+
+      <!-- Total Produk Terdaftar -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Katalog Produk</h3>
+        <p id="dash-products" class="text-2xl font-bold text-sky-600 mt-2">0 Item</p>
+        <span class="text-[11px] text-slate-400 mt-1 block">Aktif di etalase pembeli</span>
+      </div>
+
+      <!-- Pesanan Baru (Status Menunggu Pembayaran & Diproses) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Pesanan Aktif</h3>
+        <p id="dash-active-orders" class="text-2xl font-bold text-amber-600 mt-2">0 Transaksi</p>
+        <span class="text-[11px] text-amber-600 font-medium mt-1 block">Perlu tindak lanjut admin</span>
+      </div>
+
+      <!-- Total Seluruh Transaksi Masuk -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
+        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Total Pesanan</h3>
+        <p id="dash-total-orders" class="text-2xl font-bold text-slate-800 mt-2">0</p>
+        <span class="text-[11px] text-slate-400 mt-1 block">Seluruh riwayat log masuk</span>
+      </div>
     </div>
-  </nav>
 
-  <div style="padding: 3% 5%;">
-    <h3 style="color: #2c0000; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-bottom: 25px;">Daftar Masuk Pesanan</h3>
-    <div id="orders-list">Loading orders...</div>
-  </div>
+    <!-- Aktivitas Terbaru Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Log Pesanan Terkini -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <h3 class="font-bold text-slate-700 text-sm">Aktivitas Pesanan Terakhir</h3>
+          <a href="orders.html" class="text-xs font-semibold text-sky-600 hover:text-sky-800 transition">Lihat Semua →</a>
+        </div>
+        <div class="divide-y divide-slate-100" id="dash-recent-orders">
+          <!-- Diisi otomatis oleh JavaScript -->
+        </div>
+      </div>
 
-  <script type="module">
-    import { ref, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "../firebase/config.js";
+      <!-- Peringatan Stok Menipis -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+          <h3 class="font-bold text-slate-700 text-sm text-amber-700 flex items-center gap-1.5">⚠️ Perlu Restok</h3>
+        </div>
+        <div class="divide-y divide-slate-100" id="dash-low-stock">
+          <!-- Diisi otomatis oleh JavaScript -->
+        </div>
+      </div>
+    </div>
+  </main>
 
-    const listContainer = document.getElementById('orders-list');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      calculateDashboardMetrics();
+    });
 
-    get(child(ref(db), 'orders')).then((snapshot) => {
-      if(snapshot.exists()) {
-        const orders = snapshot.val();
-        let html = '';
-        for(let id in orders) {
-          const order = orders[id];
-          
-          // Format pesan WhatsApp otomatis
-          const pesanWA = `Halo ${order.customer.name}, kami dari Albimo Store. Pesanan Anda dengan ID *${id}* telah kami terima dan sedang diproses. Mohon tunggu informasi pengiriman selanjutnya, ya!`;
-          const linkWA = `https://wa.me{order.customer.whatsapp}?text=${encodeURIComponent(pesanWA)}`;
+    function calculateDashboardMetrics() {
+      // 1. Ambil data dari database lokal browser
+      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
+      const products = JSON.parse(localStorage.getItem('albimo_products')) || [];
 
-          html += `
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 4px 10px rgba(139,0,0,0.04); border-left: 5px solid #8b0000;">
-              <h4 style="margin-top:0; color:#8b0000;">Order ID: ${id} (<span style="color:#eab308;">${order.status}</span>)</h4>
-              <p style="margin: 5px 0;"><strong>Pemesan:</strong> ${order.customer.name} - ${order.customer.whatsapp}</p>
-              <p style="margin: 5px 0;"><strong>Alamat:</strong> ${order.customer.address}</p>
-              <ul style="padding-left: 20px; color: #64748b; margin: 10px 0;">
-                ${order.items.map(item => `<li>${item.name} (Rp ${Number(item.price).toLocaleString('id-ID')})</li>`).join('')}
-              </ul>
-              <div style="margin-top: 15px;">
-                <a href="${linkWA}" target="_blank" class="btn" style="background:#22c55e;">Follow up via WA</a>
+      // 2. Deklarasi penampung kalkulasi variabel
+      let totalRevenue = 0;
+      let activeOrdersCount = 0;
+
+      // 3. Proses kalkulasi pesanan
+      orderHistory.forEach(order => {
+        // Hanya masukkan ke pendapatan jika statusnya sudah dikonfirmasi "Selesai" oleh admin
+        if (order.status === 'Selesai') {
+          totalRevenue += order.total;
+        }
+        // Hitung pesanan yang butuh penanganan (Menunggu Pembayaran, Diproses, atau Dikirim)
+        if (order.status === 'Menunggu Pembayaran' || order.status === 'Diproses' || order.status === 'Dikirim') {
+          activeOrdersCount++;
+        }
+      });
+
+      // 4. Tempelkan hasil hitungan numerik ke komponen halaman HTML
+      document.getElementById('dash-revenue').innerText = formatRupiah(totalRevenue);
+      document.getElementById('dash-products').innerText = `${products.length} Item`;
+      document.getElementById('dash-active-orders').innerText = `${activeOrdersCount} Transaksi`;
+      document.getElementById('dash-total-orders').innerText = orderHistory.length;
+
+      // 5. Render 3 Transaksi Terakhir di Log Dashboard
+      const recentContainer = document.getElementById('dash-recent-orders');
+      if (orderHistory.length === 0) {
+        recentContainer.innerHTML = `<p class="p-6 text-slate-400 text-center text-xs">Belum ada transaksi terekam.</p>`;
+      } else {
+        recentContainer.innerHTML = '';
+        // Ambil maksimal 3 order paling baru
+        [...orderHistory].reverse().slice(0, 3).forEach(order => {
+          recentContainer.innerHTML += `
+            <div class="p-4 flex justify-between items-center text-sm">
+              <div>
+                <span class="font-mono text-xs font-bold text-slate-700">${order.orderId}</span>
+                <p class="text-xs text-slate-400 mt-0.5">${order.date}</p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-slate-800">${formatRupiah(order.total)}</span>
+                <p class="text-[11px] font-semibold text-sky-600">${order.status}</p>
               </div>
             </div>
           `;
-        }
-        listContainer.innerHTML = html;
-      } else {
-        listContainer.innerHTML = '<p style="color: #64748b;">Belum ada pesanan masuk.</p>';
+        });
       }
-    });
+
+      // 6. Render Produk dengan Stok Kritis (Stok <= 3 Pcs)
+      const stockContainer = document.getElementById('dash-low-stock');
+      const lowStockProducts = products.filter(p => p.stock <= 3);
+
+      if (lowStockProducts.length === 0) {
+        stockContainer.innerHTML = `<p class="p-6 text-emerald-600 text-center text-xs font-medium">✅ Aman! Semua stok produk melimpah.</p>`;
+      } else {
+        stockContainer.innerHTML = '';
+        lowStockProducts.forEach(product => {
+          stockContainer.innerHTML += `
+            <div class="p-4 flex justify-between items-center text-sm">
+              <div class="flex items-center gap-3 truncate">
+                <img src="${product.img}" class="w-8 h-8 object-cover rounded border flex-shrink-0">
+                <span class="font-medium text-slate-700 truncate max-w-[120px]">${product.name}</span>
+              </div>
+              <span class="bg-red-50 text-red-600 font-bold px-2 py-1 rounded text-xs">
+                Sisa: ${product.stock}
+              </span>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function formatRupiah(angka) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    }
   </script>
 </body>
 </html>

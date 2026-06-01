@@ -2,53 +2,128 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Admin | Manajemen Invoice Pesanan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Pesanan | Admin Albimo</title>
+  <script src="https://tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
-  <div style="padding: 5%;">
-    <h3>Manajemen Semua Invoice Masuk</h3>
-    <div id="full-orders-board">Memuat...</div>
-  </div>
+<body class="bg-slate-100 flex">
 
-  <script type="module">
-    import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "../firebase/config.js";
+  <!-- Sidebar Berwarna Biru Gelap Profesional -->
+  <aside class="w-64 bg-slate-900 text-slate-300 min-h-screen p-6 sticky top-0 h-screen">
+    <div class="text-white text-xl font-bold tracking-wider mb-10 border-b border-slate-800 pb-4">ALBIMO ADMIN</div>
+    <nav class="space-y-2">
+      <a href="dashboard.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📊 Dashboard</a>
+      <a href="products.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📦 Produk</a>
+      <a href="orders.html" class="block px-4 py-3 bg-sky-700 text-white rounded-xl font-medium">%_icon_% 🧾 Pesanan</a>
+      <a href="users.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">👥 Pengguna</a>
+    </nav>
+  </aside>
 
-    const board = document.getElementById('full-orders-board');
+  <!-- Panel Konten Utama -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800">Manajemen Pesanan</h1>
+        <p class="text-sm text-slate-500 mt-1">Kelola transaksi dan perbarui status pengiriman pelanggan.</p>
+      </div>
+      <div id="order-counter" class="text-sm bg-sky-100 text-sky-800 px-4 py-2 rounded-xl font-semibold">
+        Total: 0 Pesanan
+      </div>
+    </header>
 
-    async function loadOrders() {
-      const snapshot = await get(ref(db, 'orders'));
-      if(snapshot.exists()) {
-        const orders = snapshot.val();
-        let html = '';
-        for(let id in orders) {
-          html += `
-            <div style="background:white; padding:20px; border-radius:8px; margin-bottom:15px; border-left: 5px solid #2563eb;">
-              <h5>ID Transaksi: ${id}</h5>
-              <p>Status Saat Ini: <strong>${orders[id].status}</strong></p>
-              <button class="btn btn-status" data-id="${id}" data-status="Selesai" style="background:#10b981; padding:3px 8px; font-size:11px;">Tandai Selesai</button>
-              <button class="btn btn-status" data-id="${id}" data-status="Dibatalkan" style="background:#ef4444; padding:3px 8px; font-size:11px;">Batalkan</button>
-            </div>`;
-        }
-        board.innerHTML = html;
-        attachStatusEvents();
+    <!-- Tabel / List Transaksi Masuk -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+      <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+        <h3 class="font-bold text-slate-700">Daftar Transaksi Masuk</h3>
+      </div>
+      
+      <div class="divide-y divide-slate-100" id="admin-orders-list">
+        <!-- Data Transaksi di-render Otomatis via JS -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAdminOrders();
+    });
+
+    function renderAdminOrders() {
+      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
+      const container = document.getElementById('admin-orders-list');
+      const counter = document.getElementById('order-counter');
+
+      counter.innerText = `Total: ${orderHistory.length} Pesanan`;
+
+      if (orderHistory.length === 0) {
+        container.innerHTML = `
+          <div class="p-12 text-center text-slate-400">
+            <span class="text-4xl block mb-2">📥</span>
+            Belum ada pesanan atau transaksi masuk dari pembeli.
+          </div>
+        `;
+        return;
       }
-    }
 
-    function attachStatusEvents() {
-      document.querySelectorAll('.btn-status').forEach(btn => {
-        btn.onclick = async (e) => {
-          const id = e.target.getAttribute('data-id');
-          const nextStatus = e.target.getAttribute('data-status');
-          await update(ref(db, `orders/${id}`), { status: nextStatus });
-          alert('Status pesanan diubah menjadi ' + nextStatus);
-          loadOrders();
-        };
+      container.innerHTML = '';
+      
+      // Render data (Urutan dibalik agar pesanan terbaru berada di paling atas)
+      // Menggunakan salinan array agar tidak merusak urutan asli index di LocalStorage
+      [...orderHistory].reverse().forEach((order, reversedIndex) => {
+        // Mencari index asli di array orderHistory agar fungsi update status tidak salah target
+        const originalIndex = orderHistory.length - 1 - reversedIndex;
+
+        let itemsText = order.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+
+        container.innerHTML += `
+          <div class="p-6 hover:bg-slate-50/80 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold text-slate-700">${order.orderId}</span>
+                <span class="text-xs text-slate-400">${order.date}</span>
+              </div>
+              <p class="text-sm font-medium text-slate-800 line-clamp-1"><strong class="text-slate-400">Produk:</strong> ${itemsText}</p>
+              <p class="text-md font-bold text-sky-600">${formatRupiah(order.total)}</p>
+            </div>
+
+            <!-- Kontrol Status (Tema Biru Pro) -->
+            <div class="flex items-center gap-3">
+              <select onchange="updateOrderStatus(${originalIndex}, this.value)" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <option value="Menunggu Pembayaran" ${order.status === 'Menunggu Pembayaran' ? 'selected' : ''}>⏳ Menunggu Pembayaran</option>
+                <option value="Diproses" ${order.status === 'Diproses' ? 'selected' : ''}>📦 Diproses</option>
+                <option value="Dikirim" ${order.status === 'Dikirim' ? 'selected' : ''}>🚚 Dikirim</option>
+                <option value="Selesai" ${order.status === 'Selesai' ? 'selected' : ''}>✅ Selesai</option>
+                <option value="Dibatalkan" ${order.status === 'Dibatalkan' ? 'selected' : ''}>❌ Dibatalkan</option>
+              </select>
+            </div>
+          </div>
+        `;
       });
     }
 
-    loadOrders();
+    // Fungsi untuk memperbarui status pesanan secara realtime
+    function updateOrderStatus(index, newStatus) {
+      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
+      
+      if (orderHistory[index]) {
+        orderHistory[index].status = newStatus;
+        localStorage.setItem('albimo_order_history', JSON.stringify(orderHistory));
+        
+        // Memunculkan notifikasi sukses kecil ala Toast
+        const alertBox = document.createElement('div');
+        alertBox.className = "fixed bottom-5 right-5 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium z-50 animate-bounce";
+        alertBox.innerText = `Status Pesanan ${orderHistory[index].orderId} diubah menjadi: ${newStatus}`;
+        document.body.appendChild(alertBox);
+        
+        setTimeout(() => { alertBox.remove(); }, 2500);
+        renderAdminOrders(); // Segarkan tampilan tabel admin
+      }
+    }
+
+    function formatRupiah(angka) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    }
   </script>
 </body>
 </html>

@@ -2,33 +2,153 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Admin | Daftar Pengguna</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Pengguna | Admin Albimo</title>
+  <script src="https://tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-<body>
-  <div style="padding: 5%;">
-    <h3>Pelanggan Terdaftar</h3>
-    <ul id="users-list-group" style="list-style: none; padding: 0;"></ul>
-  </div>
+<body class="bg-slate-100 flex">
 
-  <script type="module">
-    import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { db } from "../firebase/config.js";
+  <!-- Sidebar Berwarna Biru Gelap Profesional -->
+  <aside class="w-64 bg-slate-900 text-slate-300 min-h-screen p-6 sticky top-0 h-screen">
+    <div class="text-white text-xl font-bold tracking-wider mb-10 border-b border-slate-800 pb-4">ALBIMO ADMIN</div>
+    <nav class="space-y-2">
+      <a href="dashboard.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📊 Dashboard</a>
+      <a href="products.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📦 Produk</a>
+      <a href="orders.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">🧾 Pesanan</a>
+      <a href="users.html" class="block px-4 py-3 bg-sky-700 text-white rounded-xl font-medium">👥 Pengguna</a>
+    </nav>
+  </aside>
 
-    get(ref(db, 'users')).then(snapshot => {
-      if(snapshot.exists()) {
-        const users = snapshot.val();
-        let html = '';
-        for(let uid in users) {
-          if(users[uid].role !== 'admin') {
-            html += `<li style="background:white; padding:12px; margin-bottom:8px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-              <strong>${users[uid].name}</strong> — ${users[uid].email}
-            </li>`;
-          }
-        }
-        document.getElementById('users-list-group').innerHTML = html || 'Belum ada pengguna.';
-      }
+  <!-- Panel Konten Utama -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-800">Manajemen Pengguna</h1>
+        <p class="text-sm text-slate-500 mt-1">Pantau, hapus, atau kelola tingkat hak akses (role) akun pelanggan.</p>
+      </div>
+      <div id="user-counter" class="text-sm bg-sky-100 text-sky-800 px-4 py-2 rounded-xl font-semibold">
+        Total: 0 Pengguna
+      </div>
+    </header>
+
+    <!-- Tabel Data Pengguna -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
+            <th class="p-4 pl-6">Nama Lengkap</th>
+            <th class="p-4">Alamat Email</th>
+            <th class="p-4">Hak Akses (Role)</th>
+            <th class="p-4">Tanggal Bergabung</th>
+            <th class="p-4 pr-6 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="admin-user-table" class="divide-y divide-slate-100 text-slate-700 text-sm">
+          <!-- Data Pengguna di-render Otomatis via JS -->
+        </tbody>
+      </table>
+      <div id="empty-users-state" class="hidden p-12 text-center text-slate-400">
+        <span class="text-4xl block mb-2">👥</span>
+        Belum ada pengguna atau pelanggan yang mendaftar akun.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Data Dummy Pengguna Awal jika database lokal masih kosong
+    const defaultUsers = [
+      { id: 101, name: "Albimo Administrator", email: "admin@albimo.com", role: "Admin", joinDate: "01 Jan 2026" },
+      { id: 102, name: "Budi Santoso", email: "user@albimo.com", role: "Pembeli", joinDate: "15 Feb 2026" },
+      { id: 103, name: "Siti Rahma", email: "siti@mail.com", role: "Pembeli", joinDate: "20 Mar 2026" }
+    ];
+
+    // Inisialisasi basis data lokal pengguna
+    if (!localStorage.getItem('albimo_users')) {
+      localStorage.setItem('albimo_users', JSON.stringify(defaultUsers));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAdminUsers();
     });
+
+    // Fungsi utama merender baris tabel manajemen pengguna
+    function renderAdminUsers() {
+      const users = JSON.parse(localStorage.getItem('albimo_users')) || [];
+      const tableBody = document.getElementById('admin-user-table');
+      const emptyState = document.getElementById('empty-users-state');
+      const counter = document.getElementById('user-counter');
+
+      counter.innerText = `Total: ${users.length} Pengguna`;
+
+      if (users.length === 0) {
+        tableBody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      tableBody.innerHTML = '';
+
+      users.forEach((user, index) => {
+        tableBody.innerHTML += `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-4 pl-6 font-semibold text-slate-800">${user.name}</td>
+            <td class="p-4 text-slate-500">${user.email}</td>
+            <td class="p-4">
+              <!-- Dropdown ubah role secara instan (Tema Biru Pro) -->
+              <select onchange="changeUserRole(${index}, this.value)" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium ${
+                user.role === 'Admin' ? 'text-sky-700 bg-sky-50 font-bold' : 'text-slate-600'
+              }">
+                <option value="Pembeli" ${user.role === 'Pembeli' ? 'selected' : ''}>Pembeli</option>
+                <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>Admin 👑</option>
+              </select>
+            </td>
+            <td class="p-4 text-slate-400 text-xs">${user.joinDate || 'Baru Saja'}</td>
+            <td class="p-4 pr-6 text-right">
+              <button onclick="deleteUser(${index})" class="text-red-500 hover:text-red-700 font-semibold transition text-xs">
+                Hapus Akun
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Fungsi mengubah tingkatan akun pengguna
+    function changeUserRole(index, newRole) {
+      const users = JSON.parse(localStorage.getItem('albimo_users')) || [];
+      if (users[index]) {
+        users[index].role = newRole;
+        localStorage.setItem('albimo_users', JSON.stringify(users));
+        
+        // Efek notifikasi sukses cepat
+        const toast = document.createElement('div');
+        toast.className = "fixed bottom-5 right-5 bg-sky-600 text-white px-5 py-3 rounded-xl shadow-lg text-xs font-medium z-50 animate-pulse";
+        toast.innerText = `Hak akses untuk ${users[index].name} berhasil diubah ke: ${newRole}`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 2000);
+        
+        renderAdminUsers();
+      }
+    }
+
+    // Fungsi menghapus data akun pelanggan
+    function deleteUser(index) {
+      const users = JSON.parse(localStorage.getItem('albimo_users')) || [];
+      
+      // Validasi proteksi agar admin utama tidak sengaja terhapus sendiri
+      if (users[index].email === "admin@albimo.com") {
+        alert("Gagal menghapus! Akun Administrator Utama dilindungi dan tidak boleh dihapus.");
+        return;
+      }
+
+      if (confirm(`Apakah Anda yakin ingin menghapus akun pelanggan "${users[index].name}" secara permanen?`)) {
+        users.splice(index, 1);
+        localStorage.setItem('albimo_users', JSON.stringify(users));
+        renderAdminUsers();
+      }
+    }
   </script>
 </body>
 </html>
