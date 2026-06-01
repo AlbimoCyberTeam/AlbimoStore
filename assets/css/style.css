@@ -135,3 +135,17 @@ nav a:hover {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
 }
+
+
+/* Tema Biru Langit */
+body{
+  background: linear-gradient(180deg,#87CEEB,#BFEFFF) !important;
+  min-height:100vh;
+}
+header,nav,.navbar,.topbar{
+  background:#87CEEB !important;
+}
+button,.btn{
+  background:#4AA3FF !important;
+  border-color:#4AA3FF !important;
+}
