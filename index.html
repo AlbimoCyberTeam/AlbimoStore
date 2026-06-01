@@ -14,7 +14,7 @@
       <a href="cart.html">Keranjang (<span id="cart-count">0</span>)</a> | <a href="user/orders.html">Pesanan Saya</a> | 
       <a href="auth/login.html" id="auth-link">Login</a>
     </div>
-  </nav>
+  <span id="user-info" style="margin-left:10px"></span></nav>
 
   <h2 style="padding: 2rem 5% 0;">Produk Terbaru</h2>
   <div class="grid" id="latest-products"></div>
@@ -46,5 +46,30 @@
       }
     });
   </script>
+
+<script type="module">
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth=getAuth();
+onAuthStateChanged(auth,(user)=>{
+ const el=document.getElementById('user-info');
+ if(!el) return;
+
+ if(user){
+   const name=user.displayName || user.email || 'User';
+   el.innerHTML=`<span>👤 ${name}</span> |
+   <a href="#" id="logout-btn">Logout</a>`;
+
+   document.getElementById('logout-btn').onclick=async(e)=>{
+      e.preventDefault();
+      await signOut(auth);
+      location.reload();
+   };
+ }else{
+   el.innerHTML='<a href="login.html">Login</a>';
+ }
+});
+</script>
+
 </body>
 </html>
