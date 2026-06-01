@@ -1,6 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// Konfigurasi Firebase SDK v10+
+import { initializeApp } from "https://gstatic.com";
+import { getAuth } from "https://gstatic.com";
+import { getFirestore } from "https://gstatic.com";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC_mlSh_6OoqgydUbfhFPpXEBAQjcBNNiM",
@@ -12,9 +13,6 @@ const firebaseConfig = {
   appId: "1:609426144482:web:fa6c9107832ea6ff4d72bb"
 };
 
-// Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
-
-// Ekspor modul agar bisa dibaca dari folder auth/ maupun admin/
-export const db = getDatabase(app);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
