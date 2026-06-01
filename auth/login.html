@@ -1,55 +1,36 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Albimo Store | Masuk</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <meta charset="UTF-8"><title>Keranjang Belanja | Albimo Store</title>
+  <script src="https://tailwindcss.com"></script>
 </head>
-<body style="background-color: #fdfafb;">
-  <div style="max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(139, 0, 0, 0.08); border-top: 5px solid #8b0000;">
-    <h2 style="color: #8b0000; text-align: center; margin-bottom: 25px; font-weight: 700;">Selamat Datang</h2>
-    <form id="login-form">
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="login-email" required>
+<body class="bg-slate-50 py-10">
+  <div class="container mx-auto max-w-4xl px-6">
+    <h1 class="text-2xl font-bold text-slate-800 mb-6">Keranjang Belanja Anda</h1>
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+      <div class="flex justify-between items-center border-b pb-4 mb-4">
+        <span class="text-slate-600">Total Pembayaran:</span>
+        <span class="text-2xl font-bold text-sky-600" id="total-price">Rp 0</span>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="login-password" required>
-      </div>
-      <button type="submit" class="btn" style="width: 100%; padding: 0.8rem; font-size: 16px;">Masuk</button>
-    </form>
-    <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 13px;">
-      <a href="forgot-password.html" style="color: #64748b; text-decoration: none;">Lupa Password?</a>
-      <a href="register.html" style="color: #8b0000; text-decoration: none; font-weight: bold;">Buat Akun Baru</a>
+      <a href="checkout.html" class="block text-center w-full bg-sky-600 text-white font-medium py-3 rounded-xl hover:bg-sky-700 transition shadow-md shadow-sky-100">Lanjut ke Checkout</a>
     </div>
-  </div>
+    <script>
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = e.target.querySelectorAll('input')[0].value;
+    const password = e.target.querySelectorAll('input')[1].value;
 
-  <script type="module">
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { auth, db } from "../firebase/config.js";
-
-    document.getElementById('login-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        const snapshot = await get(ref(db, 'users/' + user.uid));
-        if (snapshot.exists() && snapshot.val().role === 'admin') {
-          window.location.href = '../admin/dashboard.html';
-        } else {
-          window.location.href = '../index.html';
-        }
-      } catch (error) {
-        alert('Gagal Masuk: Email atau Password salah.');
-      }
-    };
-  </script>
+    // Simulasi Akun Hardcoded untuk Keperluan Testing Fitur Pro
+    if (email === "admin@albimo.com" && password === "admin123") {
+      alert("Login Sukses sebagai Administrator Toko.");
+      window.location.href = "../admin/dashboard.html";
+    } else if (email === "user@albimo.com" && password === "user123") {
+      alert("Login Sukses sebagai Pembeli.");
+      window.location.href = "../index.html";
+    } else {
+      alert("Email atau Kata Sandi Salah! Gunakan akun uji coba (admin@albimo.com / admin123).");
+    }
+  });
+</script>
 </body>
 </html>
