@@ -3,125 +3,307 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout Pembayaran - AlbimoStore-Pro</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout Pembayaran</title>
+
+    <link rel="stylesheet"
+    href="../assets/css/style.css">
+
     <style>
-        .checkout-container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
-        .order-summary { background: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+
+        body{
+            font-family:Arial;
+            background:#f5f5f5;
+            padding:20px;
+        }
+
+        .checkout-container{
+            max-width:600px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        .form-group{
+            margin-bottom:15px;
+        }
+
+        .form-group label{
+            display:block;
+            margin-bottom:5px;
+            font-weight:bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select{
+            width:100%;
+            padding:10px;
+            box-sizing:border-box;
+        }
+
+        .order-summary{
+            background:#f9f9f9;
+            padding:15px;
+            margin-bottom:20px;
+            border-radius:8px;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            border:none;
+            background:#007bff;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+            border-radius:6px;
+        }
+
     </style>
+
 </head>
+
 <body>
-    <div class="checkout-container">
-        <h2>Formulir Alamat Pembayaran</h2>
-        <hr>
-        
-        <!-- Ringkasan Singkat Pesanan -->
-        <div class="order-summary">
-            <h3>Ringkasan Belanja</h3>
-            <p>Total Item: <span id="summaryItems">0</span></p>
-            <h4>Total Tagihan: <span id="summaryTotal">Rp 0</span></h4>
-        </div>
 
-        <!-- Form Alamat Pengiriman -->
-        <form id="checkoutForm">
-            <div class="form-group">
-                <label for="custPhone">Nomor Telepon / WhatsApp:</label>
-                <input type="tel" id="custPhone" placeholder="Contoh: 08123456789" required>
-            </div>
-            <div class="form-group">
-                <label for="custAddress">Alamat Lengkap Pengiriman:</label>
-                <textarea id="custAddress" rows="4" placeholder="Nama Jalan, RT/RW, Kecamatan, Kota, Kode Pos" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="payMethod">Metode Pembayaran:</label>
-                <select id="payMethod" style="width:100%; padding:8px;" required>
-                    <option value="Transfer Bank">Transfer Bank (Manual)</option>
-                    <option value="E-Wallet">E-Wallet (OVO/Dana/Gopay)</option>
-                </select>
-            </div>
+<div class="checkout-container">
 
-            <button type="submit" id="btnPlaceOrder" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; font-size: 16px; cursor: pointer;">
-                Konfirmasi & Buat Pesanan
-            </button>
-        </form>
+    <h2>Checkout Pembayaran</h2>
+
+    <hr>
+
+    <div class="order-summary">
+
+        <h3>Ringkasan Belanja</h3>
+
+        <p>
+            Total Item:
+            <span id="summaryItems">0</span>
+        </p>
+
+        <h4>
+            Total Tagihan:
+            <span id="summaryTotal">Rp 0</span>
+        </h4>
+
     </div>
 
-    <script type="module">
-        import { auth, db } from "../firebase/config.js";
-        import { protectPage } from "../assets/js/auth-guard.js";
-        import { collection, addDoc } from "https://gstatic.com";
+    <form id="checkoutForm">
 
-        // Proteksi Halaman: Hanya Customer terdaftar yang bisa checkout
-        protectPage(["customer"]);
+        <div class="form-group">
 
-        // Ambil data keranjang dari LocalStorage
-        const cart = JSON.parse(localStorage.getItem("albimo_cart")) || [];
+            <label>Nomor WhatsApp</label>
 
-        // Validasi jika keranjang kosong secara tidak sengaja terakses
-        if (cart.length === 0) {
-            alert("Keranjang Anda kosong! Silakan berbelanja terlebih dahulu.");
-            window.location.href = "../index.html";
+            <input
+            type="tel"
+            id="custPhone"
+            required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Alamat Lengkap</label>
+
+            <textarea
+            id="custAddress"
+            rows="4"
+            required></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Metode Pembayaran</label>
+
+            <select id="payMethod">
+
+                <option value="Transfer Bank">
+                    Transfer Bank
+                </option>
+
+                <option value="E-Wallet">
+                    E-Wallet
+                </option>
+
+            </select>
+
+        </div>
+
+        <button type="submit"
+        id="btnPlaceOrder">
+
+            Konfirmasi Pesanan
+
+        </button>
+
+    </form>
+
+</div>
+
+<script type="module">
+
+import { auth, db }
+from "../firebase/config.js";
+
+import { protectPage }
+from "../assets/js/auth-guard.js";
+
+import {
+    collection,
+    addDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+protectPage(["customer"]);
+
+const cart =
+JSON.parse(
+localStorage.getItem("albimo_cart")
+) || [];
+
+if(cart.length === 0){
+
+    alert("Keranjang kosong");
+
+    window.location.href =
+    "cart.html";
+}
+
+function loadSummary(){
+
+    let totalItems = 0;
+    let grandTotal = 0;
+
+    cart.forEach(item=>{
+
+        totalItems += item.quantity;
+
+        grandTotal +=
+        item.price * item.quantity;
+
+    });
+
+    document.getElementById(
+        "summaryItems"
+    ).innerText = totalItems;
+
+    document.getElementById(
+        "summaryTotal"
+    ).innerText =
+    `Rp ${grandTotal.toLocaleString('id-ID')}`;
+}
+
+document.getElementById(
+"checkoutForm"
+).addEventListener(
+"submit",
+async(e)=>{
+
+    e.preventDefault();
+
+    const btn =
+    document.getElementById(
+        "btnPlaceOrder"
+    );
+
+    btn.disabled = true;
+
+    btn.innerText =
+    "Memproses...";
+
+    try{
+
+        if(!auth.currentUser){
+
+            alert("Silakan login");
+
+            return;
         }
 
-        // Tampilkan ringkasan belanja di halaman
-        function loadSummary() {
-            let totalItems = 0;
-            let grandTotal = 0;
+        let grandTotal =
+        cart.reduce(
+            (sum,item)=>
+            sum + (item.price * item.quantity),
+            0
+        );
 
-            cart.forEach(item => {
-                totalItems += item.quantity;
-                grandTotal += (item.price * item.quantity);
-            });
+        const orderData = {
 
-            document.getElementById("summaryItems").innerText = totalItems;
-            document.getElementById("summaryTotal").innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-        }
+            customerId:
+            auth.currentUser.uid,
 
-        // Proses Submit Transaksi Ke Firebase
-        document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById("btnPlaceOrder");
-            btn.disabled = true;
-            btn.innerText = "Memproses Pesanan Anda...";
+            customerEmail:
+            auth.currentUser.email,
 
-            let grandTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            shippingDetails:{
+                phone:
+                document.getElementById(
+                    "custPhone"
+                ).value,
 
-            // Susun data pesanan terstruktur untuk database
-            const orderData = {
-                customerId: auth.currentUser.uid,
-                customerEmail: auth.currentUser.email,
-                shippingDetails: {
-                    phone: document.getElementById("custPhone").value,
-                    address: document.getElementById("custAddress").value
-                },
-                items: cart, // Menyimpan array produk yang dibeli termasuk sellerId masing-masing item
-                paymentMethod: document.getElementById("payMethod").value,
-                totalPayment: grandTotal,
-                status: "Pending", // Status awal transaksi (Menunggu Konfirmasi/Pembayaran)
-                createdAt: new Date().toISOString()
-            };
+                address:
+                document.getElementById(
+                    "custAddress"
+                ).value
+            },
 
-            try {
-                // Simpan transaksi ke dalam koleksi global 'orders' di Firestore
-                await addDoc(collection(db, "orders"), orderData);
+            items:cart,
 
-                // Hapus data keranjang lokal karena pesanan sudah sukses diproses
-                localStorage.removeItem("albimo_cart");
+            paymentMethod:
+            document.getElementById(
+                "payMethod"
+            ).value,
 
-                alert("Pesanan Anda berhasil dibuat! Mengalihkan ke riwayat belanja...");
-                window.location.href = "orders.html"; // Dialihkan ke riwayat order milik customer
-            } catch (error) {
-                alert("Gagal memproses transaksi: " + error.message);
-                btn.disabled = false;
-                btn.innerText = "Konfirmasi & Buat Pesanan";
-            }
-        });
+            totalPayment:
+            grandTotal,
 
-        loadSummary();
-    </script>
+            status:"Pending",
+
+            createdAt:
+            new Date().toISOString()
+
+        };
+
+        await addDoc(
+            collection(db,"orders"),
+            orderData
+        );
+
+        localStorage.removeItem(
+            "albimo_cart"
+        );
+
+        alert(
+            "Pesanan berhasil dibuat"
+        );
+
+        window.location.href =
+        "history.html";
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "Gagal checkout: "
+            + error.message
+        );
+
+        btn.disabled = false;
+
+        btn.innerText =
+        "Konfirmasi Pesanan";
+    }
+
+});
+
+loadSummary();
+
+</script>
+
 </body>
 </html>
