@@ -77,6 +77,12 @@
 
         // Jalankan fungsi secara otomatis saat halaman dibuka oleh pengunjung
         loadPublicStores();
-    </script>
+        
+        <!-- Taruh skrip ini di bagian paling bawah sebelum tag </body> -->
+<script type="module">
+    import { initNavbar } from "./assets/js/navbar.js";
+    // Panggil fungsi tanpa argumen karena berada di folder root
+    initNavbar();
+</script>
 </body>
 </html>
