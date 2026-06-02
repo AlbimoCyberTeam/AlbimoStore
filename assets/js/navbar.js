@@ -1,7 +1,7 @@
 // assets/js/navbar.js
 import { auth, db } from "../../firebase/config.js";
-import { onAuthStateChanged } from "https://gstatic.com";
-import { doc, getDoc } from "https://gstatic.com";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Fungsi untuk membuat navbar secara otomatis
 export function initNavbar(isSubfolder = false) {

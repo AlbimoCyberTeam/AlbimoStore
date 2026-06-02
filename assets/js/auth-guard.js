@@ -1,14 +1,14 @@
 // assets/js/auth-guard.js
 import { auth, db } from "../../firebase/config.js";
-import { onAuthStateChanged } from "https://gstatic.com";
-import { doc, getDoc } from "https://gstatic.com";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Fungsi untuk mengamankan halaman berdasarkan role yang diizinkan
 export function protectPage(allowedRoles) {
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
             // Jika belum login, tendang ke halaman login root
-            window.location.href = "/login.html";
+            window.location.href = "../auth/login.html";
             return;
         }
 
@@ -22,12 +22,12 @@ export function protectPage(allowedRoles) {
                 alert("Anda tidak memiliki akses ke halaman ini!");
                 
                 // Arahkan ke dashboard masing-masing yang sesuai
-                if (userRole === "admin") window.location.href = "/admin/dashboard.html";
-                else if (userRole === "seller") window.location.href = "/seller/dashboard.html";
-                else window.location.href = "/customer/account.html";
+                if (userRole === "admin") window.location.href = "../admin/dashboard.html";
+                else if (userRole === "seller") window.location.href = "../seller/dashboard.html";
+                else window.location.href = "../customer/account.html";
             }
         } else {
-            window.location.href = "/login.html";
+            window.location.href = "../auth/login.html";
         }
     });
 }
