@@ -8,7 +8,7 @@ import { cloudinaryConfig } from "./config.js";
  */
 export async function uploadImageToCloudinary(fileObject) {
     const url = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
-    
+
     const formData = new FormData();
     formData.append("file", fileObject);
     formData.append("upload_preset", cloudinaryConfig.uploadPreset);
@@ -19,14 +19,18 @@ export async function uploadImageToCloudinary(fileObject) {
             body: formData
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error("Gagal mengunggah gambar ke Cloudinary");
+            console.error("Cloudinary Response Error:", data);
+            throw new Error(data.error?.message || "Gagal upload");
         }
 
-        const data = await response.json();
-        return data.secure_url; // Mengembalikan URL gambar HTTPS yang aman
+        return data.secure_url;
+
     } catch (error) {
         console.error("Cloudinary Upload Error:", error);
+        alert("Upload gagal: " + error.message);
         throw error;
     }
 }
