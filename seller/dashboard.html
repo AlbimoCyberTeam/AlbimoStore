@@ -1,0 +1,102 @@
+<!-- seller/dashboard.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .seller-layout { display: flex; }
+        .sidebar { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
+        .content { flex: 1; padding: 30px; }
+        .stats-grid { display: flex; gap: 20px; margin-top: 20px; }
+        .stat-card { background: #f8fafc; padding: 20px; border-radius: 8px; flex: 1; border-left: 5px solid #3b82f6; border-on: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="seller-layout">
+        <!-- Sidebar Menu Navigasi Seller -->
+        <aside class="sidebar">
+            <h3>Panel Penjual</h3>
+            <hr>
+            <a href="dashboard.html" style="font-weight: bold; color: #3b82f6;">📊 Dashboard</a>
+            <a href="store.html">🏬 Profil Toko</a>
+            <a href="products.html">📦 Kelola Produk</a>
+            <a href="orders.html">📜 Pesanan Masuk</a>
+            <hr>
+            <a href="#" id="sellerLogout" style="color: #f87171;">🚪 Keluar</a>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <h2>Ringkasan Toko Anda</h2>
+            <p>Selamat datang di panel kendali toko. Berikut adalah statistik performa dagang Anda hari ini.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Produk Saya</h4>
+                    <h2 id="myTotalProducts">-</h2>
+                </div>
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <h4>Pesanan Masuk</h4>
+                    <h2 id="myTotalOrders">-</h2>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { logoutUser } from "../firebase/auth.js";
+        import { db, auth } from "../firebase/config.js";
+        import { collection, getDocs, query, where } from "https://gstatic.com";
+
+        // Kunci rute halaman: Hanya akun ber-role 'seller' yang boleh masuk!
+        protectPage(["seller"]);
+
+        async function loadSellerStats(sellerId) {
+            try {
+                // 1. Hitung total produk milik seller ini
+                const prodQuery = query(collection(db, "products"), where("sellerId", "==", sellerId));
+                const prodSnapshot = await getDocs(prodQuery);
+                document.getElementById("myTotalProducts").innerText = `${prodSnapshot.size} Item`;
+
+                // 2. Hitung total pesanan masuk yang mengandung produk seller ini
+                const orderSnapshot = await getDocs(collection(db, "orders"));
+                let orderCount = 0;
+
+                orderSnapshot.forEach((orderDoc) => {
+                    const orderData = orderDoc.data();
+                    // Cek apakah ada item di order ini yang memiliki sellerId milik user aktif
+                    const hasMyProduct = orderData.items.some(item => item.sellerId === sellerId);
+                    if (hasMyProduct) {
+                        orderCount++;
+                    }
+                });
+
+                document.getElementById("myTotalOrders").innerText = `${orderCount} Transaksi`;
+
+            } catch (error) {
+                console.error("Gagal memuat statistik toko:", error);
+            }
+        }
+
+        // Pasang fungsi logout pada menu sidebar seller
+        document.getElementById("sellerLogout").addEventListener("click", (e) => {
+            e.preventDefault();
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                logoutUser();
+            }
+        });
+
+        // Tunggu status login terdeteksi sebelum memuat data statistik
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadSellerStats(user.uid);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!-- seller/orders.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Masuk - Seller Panel</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .seller-layout { display: flex; }
+        .sidebar { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
+        .content { flex: 1; padding: 30px; }
+        .order-box { border: 1px solid #cbd5e1; padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #f8fafc; }
+        .item-list { background: white; padding: 10px; border-radius: 4px; margin: 10px 0; border: 1px solid #e2e8f0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 14px; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-process { background: #dbeafe; color: #2563eb; }
+        .badge-shipped { background: #dcfce7; color: #16a34a; }
+    </style>
+</head>
+<body>
+    <div class="seller-layout">
+        <!-- Sidebar Menu Navigasi Seller -->
+        <aside class="sidebar">
+            <h3>Panel Penjual</h3>
+            <hr>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="store.html">🏬 Profil Toko</a>
+            <a href="products.html">📦 Kelola Produk</a>
+            <a href="orders.html" style="font-weight: bold; color: #3b82f6;">📜 Pesanan Masuk</a>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <h2>Daftar Pesanan Masuk</h2>
+            <p>Kelola pesanan pelanggan yang membeli produk dari toko Anda di bawah ini.</p>
+            <hr><br>
+
+            <div id="sellerOrdersList">Memuat data transaksi toko...</div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase/config.js";
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { collection, getDocs, doc, updateDoc } from "https://gstatic.com";
+
+        // Kunci rute halaman: Hanya akun ber-role 'seller' yang boleh mengakses
+        protectPage(["seller"]);
+
+        async function loadSellerOrders(currentSellerId) {
+            const container = document.getElementById("sellerOrdersList");
+            
+            try {
+                // Mengambil seluruh pesanan global dari database
+                const querySnapshot = await getDocs(collection(db, "orders"));
+                
+                let hasOrders = false;
+                container.innerHTML = "";
+
+                querySnapshot.forEach((orderDoc) => {
+                    const orderData = orderDoc.data();
+                    const orderId = orderDoc.id;
+
+                    // Filter produk di dalam pesanan ini yang merupakan milik seller aktif
+                    const matchingItems = orderData.items.filter(item => item.sellerId === currentSellerId);
+
+                    // Jika ada produk milik seller ini di dalam transaksi tersebut, tampilkan kotaknya
+                    if (matchingItems.length > 0) {
+                        hasOrders = true;
+                        
+                        // Menghitung subtotal pendapatan khusus untuk seller ini saja
+                        const sellerSubtotal = matchingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                        // Menentukan class visual badge status pesanan
+                        let badgeClass = "badge-pending";
+                        if (orderData.status === "Diproses") badgeClass = "badge-process";
+                        if (orderData.status === "Dikirim") badgeClass = "badge-shipped";
+
+                        const box = document.createElement("div");
+                        box.className = "order-box";
+                        
+                        // Render data pesanan dan tombol pengubah status
+                        box.innerHTML = `
+                            <h3>ID Transaksi: ${orderId}</h3>
+                            <p><strong>Tanggal:</strong> ${new Date(orderData.createdAt).toLocaleDateString('id-ID')}</p>
+                            <p><strong>Status Saat Ini:</strong> <span class="badge ${badgeClass}">${orderData.status}</span></p>
+                            <p><strong>Kontak Pembeli:</strong> ${orderData.shippingDetails.phone} (${orderData.customerEmail})</p>
+                            <p><strong>Alamat Kirim:</strong> ${orderData.shippingDetails.address}</p>
+                            
+                            <div class="item-list">
+                                <strong>Daftar Produk Toko Anda Yang Dibeli:</strong>
+                                <ul>
+                                    ${matchingItems.map(item => `
+                                        <li>${item.name} (x${item.quantity}) - Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</li>
+                                    `).join('')}
+                                </ul>
+                                <p><strong>Subtotal Pendapatan Anda:</strong> <span style="color:#16a34a; font-weight:bold;">Rp ${sellerSubtotal.toLocaleString('id-ID')}</span></p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <label><strong>Aksi Status Pesanan:</strong></label>
+                                <button onclick="updateOrderStatus('${orderId}', 'Diproses')" style="background: #2563eb; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; margin-right: 5px;">Proses Barang</button>
+                                <button onclick="updateOrderStatus('${orderId}', 'Dikirim')" style="background: #16a34a; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">Kirim Barang (Isi Resi)</button>
+                            </div>
+                        `;
+                        container.appendChild(box);
+                    }
+                });
+
+                if (!hasOrders) {
+                    container.innerHTML = "<p>Belum ada pesanan masuk untuk produk dari toko Anda.</p>";
+                }
+
+            } catch (error) {
+                console.error("Gagal memuat transaksi seller:", error);
+                container.innerHTML = "<p>Terjadi kesalahan saat memuat data pesanan toko Anda.</p>";
+            }
+        }
+
+        // Fungsi Global untuk memperbarui status pesanan di Firestore
+        window.updateOrderStatus = async (orderId, newStatus) => {
+            if (confirm(`Apakah Anda yakin ingin mengubah status pesanan ini menjadi "${newStatus}"?`)) {
+                try {
+                    const orderRef = doc(db, "orders", orderId);
+                    await updateDoc(orderRef, {
+                        status: newStatus
+                    });
+                    alert(`Status pesanan berhasil diubah menjadi ${newStatus}!`);
+                    // Refresh data di halaman setelah sukses update
+                    loadSellerOrders(auth.currentUser.uid);
+                } catch (error) {
+                    alert("Gagal memperbarui status: " + error.message);
+                }
+            }
+        };
+
+        // Pastikan status autentikasi siap dideteksi sebelum memuat data dari Firestore
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadSellerOrders(user.uid);
+            }
+        });
+    </script>
+</body>
+</html>

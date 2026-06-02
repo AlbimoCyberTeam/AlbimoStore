@@ -1,0 +1,74 @@
+<!-- seller/products.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Produk - Seller Panel</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <h2>Panel Penjual - Tambah Produk Baru</h2>
+    
+    <form id="productForm">
+        <input type="text" id="prodName" placeholder="Nama Produk" required><br><br>
+        <input type="number" id="prodPrice" placeholder="Harga (Rp)" required><br><br>
+        <input type="number" id="prodStock" placeholder="Jumlah Stok" required><br><br>
+        <textarea id="prodDesc" placeholder="Deskripsi Produk" required></textarea><br><br>
+        
+        <label>Foto Produk:</label>
+        <input type="file" id="prodImage" accept="image/*" required><br><br>
+        
+        <button type="submit" id="btnSubmit">Simpan Produk</button>
+    </form>
+
+    <script type="module">
+        import { auth } from "../firebase/config.js";
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { uploadImageToCloudinary } from "../firebase/cloudinary.js";
+        import { addProduct } from "../firebase/firestore.js";
+
+        // Kunci halaman khusus untuk Seller
+        protectPage(["seller"]);
+
+        document.getElementById("productForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById("btnSubmit");
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Mengunggah...";
+
+            try {
+                const file = document.getElementById("prodImage").files[0];
+                // 1. Upload foto ke Cloudinary
+                const imageUrl = await uploadImageToCloudinary(file);
+
+                // 2. Siapkan data produk
+                const productData = {
+                    name: document.getElementById("prodName").value,
+                    price: document.getElementById("prodPrice").value,
+                    stock: document.getElementById("prodStock").value,
+                    description: document.getElementById("prodDesc").value,
+                    imageUrl: imageUrl
+                };
+
+                // 3. Simpan ke Firestore dengan ID penjual aktif
+                const sellerId = auth.currentUser.uid;
+                const result = await addProduct(sellerId, productData);
+
+                if (result.success) {
+                    alert("Produk berhasil ditambahkan!");
+                    document.getElementById("productForm").reset();
+                } else {
+                    alert("Gagal menyimpan data: " + result.message);
+                }
+            } catch (error) {
+                alert("Terjadi kesalahan: " + error.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Simpan Produk";
+            }
+        });
+    </script>
+</body>
+</html>
