@@ -41,42 +41,52 @@
 
     <script type="module">
         import { auth, db } from "../firebase/config.js";
-        import { protectPage } from "../assets/js/auth-guard.js";
-        import { logoutUser } from "../firebase/auth.js";
-        import { doc, getDoc } from "https://gstatic.com";
+import { protectPage } from "../assets/js/auth-guard.js";
+import { logoutUser } from "../firebase/auth.js";
 
-        // Kunci rute halaman: Hanya akun ber-role 'customer' yang boleh masuk!
-        protectPage(["customer"]);
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // Fungsi mengambil data lengkap profil dari Firestore
-        async function loadCustomerProfile(uid) {
-            try {
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    document.getElementById("custName").innerText = userData.fullName || "Tanpa Nama";
-                    document.getElementById("custEmail").innerText = userData.email || "-";
-                }
-            } catch (error) {
-                console.error("Gagal memuat profil customer:", error);
-            }
+// Kunci rute halaman
+protectPage(["customer"]);
+
+// Ambil profil customer
+async function loadCustomerProfile(uid) {
+    try {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+
+            document.getElementById("custName").innerText =
+                userData.fullName || "Tanpa Nama";
+
+            document.getElementById("custEmail").innerText =
+                userData.email || "-";
         }
+    } catch (error) {
+        console.error("Gagal memuat profil customer:", error);
+    }
+}
 
-        // Pasang fungsi logout pada tombol
-        document.getElementById("btnCustomerLogout").addEventListener("click", () => {
-            if (confirm("Apakah Anda yakin ingin keluar dari akun?")) {
-                logoutUser();
-            }
-        });
+// Logout
+document.getElementById("btnCustomerLogout").addEventListener("click", () => {
+    if (confirm("Apakah Anda yakin ingin keluar dari akun?")) {
+        logoutUser();
+    }
+});
 
-        // Tunggu status login siap untuk membaca UID pengguna
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loadCustomerProfile(user.uid);
-            }
-        });
+// Deteksi login
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadCustomerProfile(user.uid);
+    }
+});
     </script>
 </body>
 </html>
