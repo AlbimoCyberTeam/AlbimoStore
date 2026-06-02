@@ -3,7 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Ganti dengan konfigurasi asli dari Firebase Console Anda
 const firebaseConfig = {
     apiKey: "AIzaSyC_mlSh_6OoqgydUbfhFPpXEBAQjcBNNiM",
     authDomain: "albimostore.firebaseapp.com",
@@ -13,13 +12,11 @@ const firebaseConfig = {
     appId: "1:609426144482:web:fa6c9107832ea6ff4d72bb"
 };
 
-// Inisialisasi Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Konfigurasi Cloudinary (untuk upload gambar)
 export const cloudinaryConfig = {
     cloudName: "diutiwqz1",
-    uploadPreset: "albimostore" // Pastikan mode 'unsigned' aktif di Cloudinary
+    uploadPreset: "albimostore"
 };
