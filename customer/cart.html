@@ -66,6 +66,12 @@
 
         // Jalankan tampilan keranjang saat halaman dimuat
         displayCart();
-    </script>
+
+<!-- Taruh skrip ini di bagian paling bawah sebelum tag </body> -->
+<script type="module">
+    import { initNavbar } from "../assets/js/navbar.js";
+    // Berikan nilai true karena file ini berada di dalam subfolder
+    initNavbar(true);
+</script>
 </body>
 </html>
