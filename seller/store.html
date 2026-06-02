@@ -1,0 +1,131 @@
+<!-- seller/store.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Toko - Seller Panel</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .seller-layout { display: flex; }
+        .sidebar { width: 220px; background: #2c3e50; color: white; min-height: 100vh; padding: 20px; }
+        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
+        .content { flex: 1; padding: 30px; }
+        .form-container { max-width: 500px; background: #f8fafc; padding: 25px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="seller-layout">
+        <!-- Sidebar Menu Navigasi Seller -->
+        <aside class="sidebar">
+            <h3>Panel Penjual</h3>
+            <hr>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="store.html" style="font-weight: bold; color: #3b82f6;">🏬 Profil Toko</a>
+            <a href="products.html">📦 Kelola Produk</a>
+            <a href="orders.html">📜 Pesanan Masuk</a>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <h2>Pengaturan Profil Toko</h2>
+            <p>Perbarui informasi identitas toko Anda agar terlihat menarik bagi calon pembeli.</p>
+            <hr><br>
+
+            <div class="form-container">
+                <form id="storeProfileForm">
+                    <div class="form-group">
+                        <label for="storeName">Nama Toko:</label>
+                        <input type="text" id="storeName" placeholder="Contoh: Albimo Tech Official" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="storeSlogan">Slogan Toko:</label>
+                        <input type="text" id="storeSlogan" placeholder="Contoh: Gadget Murah Berkualitas">
+                    </div>
+                    <div class="form-group">
+                        <label for="storeDesc">Deskripsi Toko:</label>
+                        <textarea id="storeDesc" rows="4" placeholder="Jelaskan mengenai jenis produk yang Anda jual di toko ini..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="btnSaveStore" style="width: 100%; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase/config.js";
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { doc, getDoc, updateDoc } from "https://gstatic.com";
+
+        // Kunci rute halaman: Hanya akun ber-role 'seller' yang boleh masuk!
+        protectPage(["seller"]);
+
+        // Fungsi memuat data toko yang sudah tersimpan sebelumnya
+        async function loadStoreData(sellerId) {
+            try {
+                const userRef = doc(db, "users", sellerId);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    
+                    // Isi formulir jika data profil toko sudah pernah dibuat sebelumnya
+                    if (data.storeDetails) {
+                        document.getElementById("storeName").value = data.storeDetails.name || "";
+                        document.getElementById("storeSlogan").value = data.storeDetails.slogan || "";
+                        document.getElementById("storeDesc").value = data.storeDetails.description || "";
+                    } else {
+                        // Jika baru pertama kali, default diisi nama lengkap seller
+                        document.getElementById("storeName").value = data.fullName || "";
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal memuat profil toko:", error);
+            }
+        }
+
+        // Proses memperbarui profil toko ke Firestore
+        document.getElementById("storeProfileForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("btnSaveStore");
+            btn.disabled = true;
+            btn.innerText = "Menyimpan...";
+
+            try {
+                const sellerId = auth.currentUser.uid;
+                const userRef = doc(db, "users", sellerId);
+
+                // Update objek storeDetails di dalam dokumen user
+                await updateDoc(userRef, {
+                    storeDetails: {
+                        name: document.getElementById("storeName").value,
+                        slogan: document.getElementById("storeSlogan").value,
+                        description: document.getElementById("storeDesc").value,
+                        updatedAt: new Date().toISOString()
+                    }
+                });
+
+                alert("Profil toko berhasil diperbarui!");
+            } catch (error) {
+                alert("Gagal memperbarui profil: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Simpan Perubahan";
+            }
+        });
+
+        // Tunggu status login terdeteksi sebelum memuat data
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadStoreData(user.uid);
+            }
+        });
+    </script>
+</body>
+</html>
