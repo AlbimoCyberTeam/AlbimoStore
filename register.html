@@ -1,0 +1,52 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Pendaftaran Akun</h2>
+        <form id="registerForm">
+            <input type="text" id="regName" placeholder="Nama Lengkap" required><br><br>
+            <input type="email" id="regEmail" placeholder="Email" required><br><br>
+            <input type="password" id="regPassword" placeholder="Password (Minimal 6 Karakter)" required><br><br>
+            
+            <label for="regRole">Daftar Sebagai:</label>
+            <select id="regRole" required>
+                <option value="customer">Customer (Pembeli)</option>
+                <option value="seller">Seller (Penjual)</option>
+            </select><br><br>
+
+            <button type="submit">Daftar Sekarang</button>
+        </form>
+        <p>Sudah punya akun? <a href="login.html">Login di sini</a></p>
+    </div>
+
+    <script type="module">
+        import { registerUser } from "./firebase/auth.js";
+
+        document.getElementById("registerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById("regName").value;
+            const email = document.getElementById("regEmail").value;
+            const password = document.getElementById("regPassword").value;
+            const role = document.getElementById("regRole").value;
+
+            const result = await registerUser(email, password, name, role);
+
+            if (result.success) {
+                alert("Registrasi berhasil! Mengalihkan ke halaman login...");
+                window.location.href = "login.html";
+            } else {
+                alert("Gagal mendaftar: " + result.message);
+            }
+        });
+    </script>
+</body>
+</html>

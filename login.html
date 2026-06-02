@@ -1,0 +1,48 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Masuk ke Akun Anda</h2>
+        <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" required><br><br>
+            <input type="password" id="loginPassword" placeholder="Password" required><br><br>
+            <button type="submit">Login</button>
+        </form>
+        <p>Belum punya akun? <a href="register.html">Daftar di sini</a></p>
+    </div>
+
+    <script type="module">
+        import { loginUser } from "./firebase/auth.js";
+
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            const result = await loginUser(email, password);
+
+            if (result.success) {
+                // Pengalihan otomatis berdasarkan ROLE pengguna
+                if (result.role === "admin") {
+                    window.location.href = "admin/dashboard.html";
+                } else if (result.role === "seller") {
+                    window.location.href = "seller/dashboard.html";
+                } else {
+                    window.location.href = "customer/account.html";
+                }
+            } else {
+                alert("Login gagal: " + result.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!-- stores.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Toko - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
+        .store-card { border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .store-name { color: #1e3a8a; margin-top: 0; margin-bottom: 5px; }
+        .store-slogan { font-style: italic; color: #64748b; font-size: 14px; margin-bottom: 15px; }
+        .store-desc { color: #334155; font-size: 14px; line-height: 1.5; }
+        .btn-visit { display: inline-block; margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Direktori Toko AlbimoStore-Pro</h1>
+        <nav>
+            <a href="index.html">🏠 Beranda</a> | 
+            <a href="stores.html" style="font-weight: bold;">🏬 Daftar Toko</a> | 
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="storesContainer" class="stores-grid">Memuat daftar toko mitra...</div>
+    </main>
+
+    <script type="module">
+        import { db } from "./firebase/config.js";
+        import { collection, query, where, getDocs } from "https://gstatic.com";
+
+        async function loadPublicStores() {
+            const container = document.getElementById("storesContainer");
+
+            try {
+                // Mencari semua pengguna di Firestore yang memiliki peran (role) sebagai 'seller'
+                const q = query(collection(db, "users"), where("role", "==", "seller"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = "<p>Saat ini belum ada toko mitra yang terdaftar.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const sellerData = doc.data();
+                    
+                    // Ambil detail toko jika sudah diatur oleh seller di panel mereka
+                    const store = sellerData.storeDetails || {};
+                    const name = store.name || sellerData.fullName || "Toko Tanpa Nama";
+                    const slogan = store.slogan || "Selamat datang di toko kami!";
+                    const description = store.description || "Penjual belum menambahkan deskripsi toko.";
+
+                    // Membuat elemen kartu toko
+                    const card = document.createElement("div");
+                    card.className = "store-card";
+                    card.innerHTML = `
+                        <h3 class="store-name">${name}</h3>
+                        <p class="store-slogan">"${slogan}"</p>
+                        <p class="store-desc">${description}</p>
+                        <a href="index.html?seller=${doc.id}" class="btn-visit">Kunjungi Toko →</a>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Gagal memuat direktori toko:", error);
+                container.innerHTML = "<p style='color: red;'>Gagal memuat data toko dari server.</p>";
+            }
+        }
+
+        // Jalankan fungsi secara otomatis saat halaman dibuka oleh pengunjung
+        loadPublicStores();
+    </script>
+</body>
+</html>

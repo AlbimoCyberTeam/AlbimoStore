@@ -1,56 +1,63 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Albimo Store | Marketplace Premium</title>
-  
-  <!-- 🔥 PASTIKAN SCRIPT INI ADA DAN TIDAK SALAH KETIK -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Jika menggunakan file CSS manual, pastikan jalurnya benar -->
-  <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlbimoStore-Pro - Home</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .product-grid { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; }
+        .product-card { border: 1px solid #ddd; padding: 15px; width: 200px; border-radius: 8px; }
+        .product-card img { max-width: 100%; height: 150px; object-fit: cover; }
+    </style>
 </head>
+<body>
+    <header>
+        <h1>Welcome to AlbimoStore-Pro</h1>
+        <nav>
+            <a href="login.html">Login</a> | <a href="customer/cart.html">Keranjang🛒</a>
+        </nav>
+    </header>
 
-<body class="bg-blue-50">
-  <!-- Navbar Utama Berwarna Biru -->
-  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="index.html" class="text-2xl font-bold tracking-wider">ALBIMO <span class="text-sky-300">STORE</span></a>
-      <div class="flex items-center space-x-6">
-        <a href="products.html" class="hover:text-sky-200 transition">Produk</a>
-        <a href="cart.html" class="relative hover:text-sky-200 transition">
-          🛒 <span id="cart-count" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
-        </a>
-        <a href="auth/login.html" class="bg-sky-600 hover:bg-sky-500 px-4 py-2 rounded-md font-medium transition">Masuk</a>
-      </div>
-    </div>
-  </nav>
+    <main>
+        <h3>Produk Terbaru</h3>
+        <div id="productContainer" class="product-grid">Loading produk...</div>
+    </main>
 
-  <!-- Hero Section -->
-  <header class="bg-gradient-to-r top-bg from-sky-800 to-sky-600 text-white py-20 px-6 text-center">
-    <h1 class="text-4xl md:text-6xl font-bold mb-4">Belanja Gadget Pro di Albimo</h1>
-    <p class="text-sky-100 text-lg mb-8">Platform marketplace terpercaya dengan kualitas premium dan pelayanan kilat.</p>
-    <a href="products.html" class="bg-white text-sky-700 font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-sky-50 transition">Jelajahi Produk</a>
-  </header>
+    <script type="module">
+        import { getAllProducts } from "./firebase/firestore.js";
 
-  <!-- Container Utama -->
-  <main class="container mx-auto px-6 py-12">
-    <h2 class="text-2xl font-bold text-slate-800 mb-8 border-l-4 border-sky-600 pl-3">Produk Unggulan</h2>
-    <div id="featured-products" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-      <!-- Dummy Card Produk -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden border border-slate-100">
-        <img src="https://unsplash.com" alt="Produk" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <span class="text-xs font-semibold text-sky-600 bg-sky-50 px-2 py-1 rounded">Elektronik</span>
-          <h3 class="font-bold text-slate-800 mt-2 text-lg truncate">Albimo Headphone Pro X</h3>
-          <p class="text-sky-600 font-bold mt-1">Rp 1.250.000</p>
-          <a href="product-detail.html" class="block text-center mt-4 bg-sky-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition">Lihat Detail</a>
-        </div>
-      </div>
-    </div>
-  </main>
+        async function loadCatalog() {
+            const container = document.getElementById("productContainer");
+            const products = await getAllProducts();
 
-  <script src="assets/js/main.js"></script>
+            if (products.length === 0) {
+                container.innerHTML = "<p>Belum ada produk yang dijual.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+            products.forEach(product => {
+                const card = document.createElement("div");
+                card.className = "product-card";
+                card.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    <p>Rp ${Number(product.price).toLocaleString('id-ID')}</p>
+                    <button onclick="goToDetail('${product.id}')">Lihat Detail</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Ekspos fungsi navigasi ke window object agar bisa dipanggil lewat onclick HTML
+        window.goToDetail = (id) => {
+            window.location.href = `product.html?id=${id}`;
+        };
+
+        loadCatalog();
+    </script>
 </body>
 </html>
