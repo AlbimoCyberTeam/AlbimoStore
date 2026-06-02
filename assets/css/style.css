@@ -1,23 +1,276 @@
+/* assets/css/style.css */
 
-:root{
- --blue-primary:#2563eb;
- --blue-dark:#1e40af;
- --blue-light:#dbeafe;
- --bg-main:#eff6ff;
+/* 1. Pengaturan Dasar & Variabel Warna */
+:root {
+    --primary-color: #3b82f6;      /* Biru Modern */
+    --primary-hover: #2563eb;
+    --dark-bg: #1e293b;           /* Sidebar Gelap */
+    --light-bg: #f8fafc;          /* Latar Belakang Konten */
+    --text-color: #334155;        /* Warna Teks Utama */
+    --border-color: #e2e8f0;      /* Garis Pembatas */
+    --success-color: #10b981;     /* Hijau Sukses/Beli */
+    --danger-color: #ef4444;      /* Merah Hapus/Batal */
+    --warning-color: #f59e0b;     /* Oranye/Kuning Pending */
 }
-*{box-sizing:border-box}
-body{
- font-family:Inter,Arial,sans-serif;
- background:linear-gradient(180deg,#dbeafe,#eff6ff,#ffffff);
- color:#1f2937;
- margin:0;
- min-height:100vh;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.top-bg{background:linear-gradient(135deg,var(--blue-dark),var(--blue-primary))}
-.card,.bg-white{
- border-radius:12px;
- box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+body {
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    line-height: 1.6;
 }
-a{transition:.2s}
-::-webkit-scrollbar{width:8px}
-::-webkit-scrollbar-thumb{background:var(--blue-primary);border-radius:10px}
+
+/* 2. Gaya Header & Navigasi Publik (index.html, stores.html) */
+header {
+    background-color: white;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+header h1 {
+    font-size: 24px;
+    color: var(--dark-bg);
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+nav a:hover {
+    color: var(--primary-color);
+}
+
+main {
+    padding: 40px;
+}
+
+/* 3. Formulir Autentikasi (login.html, register.html) */
+.auth-container {
+    max-width: 400px;
+    margin: 80px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--dark-bg);
+}
+
+.auth-container input, 
+.auth-container select,
+.auth-container textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.auth-container input:focus,
+.auth-container select:focus,
+.auth-container textarea:focus {
+    border-color: var(--primary-color);
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-container button:hover {
+    background-color: var(--primary-hover);
+}
+
+.auth-container p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-container a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* 4. Formulir Umum Panel (Seller/Customer) */
+form input, form select, form textarea {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 100%;
+}
+
+form button[type="submit"] {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+form button[type="submit"]:hover {
+    background-color: var(--primary-hover);
+}
+
+/* 5. Tata Letak Dasbor Berbasis Peran (Admin & Seller Layout) */
+.admin-layout, .seller-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+    background-color: var(--dark-bg);
+    color: white;
+    padding: 25px 20px;
+    flex-shrink: 0;
+}
+
+.sidebar h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.sidebar hr {
+    border: 0;
+    border-top: 1px solid #334155;
+    margin: 15px 0;
+}
+
+.sidebar a {
+    color: #94a3b8;
+    display: block;
+    padding: 10px 12px;
+    margin: 4px 0;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: all 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: #334155;
+    color: white;
+}
+
+.content {
+    flex: 1;
+    padding: 40px;
+    background-color: var(--light-bg);
+    overflow-y: auto;
+}
+
+.content h2 {
+    margin-bottom: 8px;
+    color: var(--dark-bg);
+}
+
+/* 6. Tabel Data Responsif (Admin & Seller Panel) */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+th, td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: #f1f5f9;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+/* 7. Komponen Desain Dinamis (Badges & Kancing Aksi) */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.badge-pending { background-color: #fef3c7; color: #d97706; }
+.badge-process { background-color: #dbeafe; color: #2563eb; }
+.badge-shipped { background-color: #dcfce7; color: #16a34a; }
+.badge-canceled { background-color: #fee2e2; color: #ef4444; }
+
+.badge-customer { background-color: #f1f5f9; color: #475569; }
+.badge-seller { background-color: #e0f2fe; color: #0369a1; }
+.badge-admin { background-color: #fce7f3; color: #9d174d; }
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+/* Media Query untuk Responsivitas Layar Ponsel */
+@media (max-width: 768px) {
+    .admin-layout, .seller-layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+        padding: 15px;
+    }
+    .content {
+        padding: 20px;
+    }
+}
