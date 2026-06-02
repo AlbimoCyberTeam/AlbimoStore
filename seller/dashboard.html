@@ -51,7 +51,13 @@
         import { protectPage } from "../assets/js/auth-guard.js";
         import { logoutUser } from "../firebase/auth.js";
         import { db, auth } from "../firebase/config.js";
-        import { collection, getDocs, query, where } from "https://gstatic.com";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+    collection,
+    getDocs,
+    query,
+    where
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // Kunci rute halaman: Hanya akun ber-role 'seller' yang boleh masuk!
         protectPage(["seller"]);
@@ -83,20 +89,21 @@
             }
         }
 
-        // Pasang fungsi logout pada menu sidebar seller
-        document.getElementById("sellerLogout").addEventListener("click", (e) => {
-            e.preventDefault();
-            if (confirm("Apakah Anda yakin ingin keluar?")) {
-                logoutUser();
-            }
-        });
+       // Pasang fungsi logout pada menu sidebar seller
+document.getElementById("sellerLogout").addEventListener("click", (e) => {
+    e.preventDefault();
 
-        // Tunggu status login terdeteksi sebelum memuat data statistik
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loadSellerStats(user.uid);
-            }
-        });
+    if (confirm("Apakah Anda yakin ingin keluar?")) {
+        logoutUser();
+    }
+});
+
+// Tunggu status login terdeteksi sebelum memuat data statistik
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadSellerStats(user.uid);
+    }
+});
     </script>
 </body>
 </html>
