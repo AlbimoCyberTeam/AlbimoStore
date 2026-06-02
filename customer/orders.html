@@ -1,0 +1,73 @@
+<!-- customer/orders.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Pesanan Saya - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .order-card { border: 1px solid #ccc; padding: 15px; margin: 15px 0; border-radius: 6px; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #ffeeba; color: #856404; }
+    </style>
+</head>
+<body>
+    <h2>Riwayat Belanja Anda</h2>
+    <a href="../index.html">← Kembali Belanja</a>
+    <hr>
+    
+    <div id="ordersContainer">Memuat riwayat pesanan...</div>
+
+    <script type="module">
+        import { auth, db } from "../firebase/config.js";
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { collection, query, where, getDocs, orderBy } from "https://gstatic.com";
+
+        protectPage(["customer"]);
+
+        async function fetchCustomerOrders() {
+            const container = document.getElementById("ordersContainer");
+            
+            try {
+                // Query mengambil data order berdasarkan UID pengguna aktif
+                const q = query(
+                    collection(db, "orders"), 
+                    where("customerId", "==", auth.currentUser.uid)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = "<p>Anda belum pernah melakukan transaksi apa pun.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const order = doc.data();
+                    const orderId = doc.id;
+                    
+                    const card = document.createElement("div");
+                    card.className = "order-card";
+                    card.innerHTML = `
+                        <h4>ID Transaksi: ${orderId}</h4>
+                        <p>Tanggal: ${new Date(order.createdAt).toLocaleDateString('id-ID')}</p>
+                        <p>Status Pembayaran: <span class="status-badge">${order.status}</span></p>
+                        <p>Total Bayar: <strong>Rp ${order.totalPayment.toLocaleString('id-ID')}</strong></p>
+                        <p>Metode: ${order.paymentMethod}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = "<p>Gagal memuat riwayat data pesanan.</p>";
+            }
+        }
+
+        // Menunggu auth siap agar ID user terdeteksi sempurna
+        auth.onAuthStateChanged((user) => {
+            if (user) fetchCustomerOrders();
+        });
+    </script>
+</body>
+</html>

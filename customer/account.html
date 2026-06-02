@@ -1,0 +1,82 @@
+<!-- customer/account.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun Saya - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .customer-container { max-width: 600px; margin: 30px auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
+        .profile-card { background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #cbd5e1; }
+        .menu-grid { display: flex; gap: 15px; margin-top: 20px; }
+        .menu-btn { flex: 1; padding: 12px; text-align: center; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .menu-btn.alt { background: #64748b; }
+        .logout-btn { display: block; width: 100%; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="customer-container">
+        <h2>Profil Pengguna</h2>
+        <p>Kelola informasi akun dan lacak aktivitas belanja Anda.</p>
+        <hr><br>
+
+        <!-- Kartu Informasi Profil -->
+        <div class="profile-card">
+            <h3>Detail Informasi</h3>
+            <p><strong>Nama Lengkap:</strong> <span id="custName">Memuat...</span></p>
+            <p><strong>Alamat Email:</strong> <span id="custEmail">Memuat...</span></p>
+            <p><strong>Status Akun:</strong> <span style="color: #16a34a; font-weight: bold;">Customer Aktif</span></p>
+        </div>
+
+        <!-- Menu Navigasi Cepat Customer -->
+        <h3>Aktivitas Belanja</h3>
+        <div class="menu-grid">
+            <a href="cart.html" class="menu-btn">🛒 Keranjang Belanja</a>
+            <a href="orders.html" class="menu-btn alt">📜 Riwayat Pesanan</a>
+        </div>
+
+        <button id="btnCustomerLogout" class="logout-btn">🚪 Keluar dari Akun</button>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "../firebase/config.js";
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { logoutUser } from "../firebase/auth.js";
+        import { doc, getDoc } from "https://gstatic.com";
+
+        // Kunci rute halaman: Hanya akun ber-role 'customer' yang boleh masuk!
+        protectPage(["customer"]);
+
+        // Fungsi mengambil data lengkap profil dari Firestore
+        async function loadCustomerProfile(uid) {
+            try {
+                const userRef = doc(db, "users", uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    document.getElementById("custName").innerText = userData.fullName || "Tanpa Nama";
+                    document.getElementById("custEmail").innerText = userData.email || "-";
+                }
+            } catch (error) {
+                console.error("Gagal memuat profil customer:", error);
+            }
+        }
+
+        // Pasang fungsi logout pada tombol
+        document.getElementById("btnCustomerLogout").addEventListener("click", () => {
+            if (confirm("Apakah Anda yakin ingin keluar dari akun?")) {
+                logoutUser();
+            }
+        });
+
+        // Tunggu status login siap untuk membaca UID pengguna
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadCustomerProfile(user.uid);
+            }
+        });
+    </script>
+</body>
+</html>
