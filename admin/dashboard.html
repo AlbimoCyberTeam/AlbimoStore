@@ -1,175 +1,86 @@
+<!-- admin/dashboard.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin | Albimo Store</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AlbimoStore-Pro</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .admin-layout { display: flex; }
+        .sidebar { width: 220px; background: #333; color: white; min-height: 100vh; padding: 20px; }
+        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
+        .content { flex: 1; padding: 30px; }
+        .stats-grid { display: flex; gap: 20px; margin-top: 20px; }
+        .stat-card { background: #f4f4f4; padding: 20px; border-radius: 8px; flex: 1; border-left: 5px solid #007bff; }
+    </style>
 </head>
-<body class="bg-slate-100 flex">
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Menu Navigasi Admin -->
+        <aside class="sidebar">
+            <h3>Albimo Admin</h3>
+            <hr>
+            <a href="dashboard.html" style="font-weight: bold; color: #007bff;">📊 Dashboard</a>
+            <a href="sellers.html">🏬 Kelola Seller</a>
+            <a href="users.html">👥 Kelola Pengguna</a>
+            <a href="products.html">📦 Semua Produk</a>
+            <a href="orders.html">📜 Riwayat Transaksi</a>
+            <hr>
+            <a href="#" id="adminLogout" style="color: #ff4d4d;">🚪 Keluar</a>
+        </aside>
 
-  <!-- Sidebar Berwarna Biru Gelap Profesional -->
-  <aside class="w-64 bg-slate-900 text-slate-300 min-h-screen p-6 sticky top-0 h-screen">
-    <div class="text-white text-xl font-bold tracking-wider mb-10 border-b border-slate-800 pb-4">ALBIMO ADMIN</div>
-    <nav class="space-y-2">
-      <a href="dashboard.html" class="block px-4 py-3 bg-sky-700 text-white rounded-xl font-medium">📊 Dashboard</a>
-      <a href="products.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📦 Produk</a>
-      <a href="orders.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">🧾 Pesanan</a>
-      <a href="users.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">👥 Pengguna</a>
-    </nav>
-  </aside>
+        <!-- Main Content Area -->
+        <main class="content">
+            <h2>Ringkasan Platform</h2>
+            <p>Selamat datang kembali di panel kendali utama AlbimoStore-Pro.</p>
 
-  <!-- Panel Konten Utama -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <header class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-slate-800">Ringkasan Toko</h1>
-        <p class="text-sm text-slate-500 mt-1">Pantau statistik penjualan, pendapatan, dan aktivitas inventaris secara realtime.</p>
-      </div>
-      <span class="text-sm bg-emerald-100 text-emerald-800 px-4 py-2 rounded-xl font-semibold flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktif
-      </span>
-    </header>
-    
-    <!-- Statistik Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-      <!-- Total Pendapatan (Hanya menghitung order bersatutus Selesai) -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Total Pendapatan</h3>
-        <p id="dash-revenue" class="text-2xl font-bold text-slate-800 mt-2">Rp 0</p>
-        <span class="text-[11px] text-emerald-600 font-medium mt-1 block">Dari transaksi sukses</span>
-      </div>
-
-      <!-- Total Produk Terdaftar -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Katalog Produk</h3>
-        <p id="dash-products" class="text-2xl font-bold text-sky-600 mt-2">0 Item</p>
-        <span class="text-[11px] text-slate-400 mt-1 block">Aktif di etalase pembeli</span>
-      </div>
-
-      <!-- Pesanan Baru (Status Menunggu Pembayaran & Diproses) -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Pesanan Aktif</h3>
-        <p id="dash-active-orders" class="text-2xl font-bold text-amber-600 mt-2">0 Transaksi</p>
-        <span class="text-[11px] text-amber-600 font-medium mt-1 block">Perlu tindak lanjut admin</span>
-      </div>
-
-      <!-- Total Seluruh Transaksi Masuk -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
-        <h3 class="text-slate-400 font-medium text-xs uppercase tracking-wider">Total Pesanan</h3>
-        <p id="dash-total-orders" class="text-2xl font-bold text-slate-800 mt-2">0</p>
-        <span class="text-[11px] text-slate-400 mt-1 block">Seluruh riwayat log masuk</span>
-      </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total Pengguna</h4>
+                    <h2 id="totalUsers">-</h2>
+                </div>
+                <div class="stat-card" style="border-left-color: #28a745;">
+                    <h4>Total Produk Aktif</h4>
+                    <h2 id="totalProducts">-</h2>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Aktivitas Terbaru Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Log Pesanan Terkini -->
-      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h3 class="font-bold text-slate-700 text-sm">Aktivitas Pesanan Terakhir</h3>
-          <a href="orders.html" class="text-xs font-semibold text-sky-600 hover:text-sky-800 transition">Lihat Semua →</a>
-        </div>
-        <div class="divide-y divide-slate-100" id="dash-recent-orders">
-          <!-- Diisi otomatis oleh JavaScript -->
-        </div>
-      </div>
+    <script type="module">
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { logoutUser } from "../firebase/auth.js";
+        import { db } from "../firebase/config.js";
+        import { collection, getCountFromServer } from "https://gstatic.com";
 
-      <!-- Peringatan Stok Menipis -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h3 class="font-bold text-slate-700 text-sm text-amber-700 flex items-center gap-1.5">⚠️ Perlu Restok</h3>
-        </div>
-        <div class="divide-y divide-slate-100" id="dash-low-stock">
-          <!-- Diisi otomatis oleh JavaScript -->
-        </div>
-      </div>
-    </div>
-  </main>
+        // Kunci halaman: Hanya akun ber-role 'admin' yang boleh masuk
+        protectPage(["admin"]);
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      calculateDashboardMetrics();
-    });
+        // Fungsi menghitung total data secara real-time & hemat kuota Firebase (Menggunakan getCountFromServer)
+        async function loadStats() {
+            try {
+                const usersColl = collection(db, "users");
+                const userSnapshot = await getCountFromServer(usersColl);
+                document.getElementById("totalUsers").innerText = `${userSnapshot.data().count} Pengguna`;
 
-    function calculateDashboardMetrics() {
-      // 1. Ambil data dari database lokal browser
-      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
-      const products = JSON.parse(localStorage.getItem('albimo_products')) || [];
-
-      // 2. Deklarasi penampung kalkulasi variabel
-      let totalRevenue = 0;
-      let activeOrdersCount = 0;
-
-      // 3. Proses kalkulasi pesanan
-      orderHistory.forEach(order => {
-        // Hanya masukkan ke pendapatan jika statusnya sudah dikonfirmasi "Selesai" oleh admin
-        if (order.status === 'Selesai') {
-          totalRevenue += order.total;
+                const productsColl = collection(db, "products");
+                const productSnapshot = await getCountFromServer(productsColl);
+                document.getElementById("totalProducts").innerText = `${productSnapshot.data().count} Produk`;
+            } catch (error) {
+                console.error("Gagal memuat statistik:", error);
+            }
         }
-        // Hitung pesanan yang butuh penanganan (Menunggu Pembayaran, Diproses, atau Dikirim)
-        if (order.status === 'Menunggu Pembayaran' || order.status === 'Diproses' || order.status === 'Dikirim') {
-          activeOrdersCount++;
-        }
-      });
 
-      // 4. Tempelkan hasil hitungan numerik ke komponen halaman HTML
-      document.getElementById('dash-revenue').innerText = formatRupiah(totalRevenue);
-      document.getElementById('dash-products').innerText = `${products.length} Item`;
-      document.getElementById('dash-active-orders').innerText = `${activeOrdersCount} Transaksi`;
-      document.getElementById('dash-total-orders').innerText = orderHistory.length;
-
-      // 5. Render 3 Transaksi Terakhir di Log Dashboard
-      const recentContainer = document.getElementById('dash-recent-orders');
-      if (orderHistory.length === 0) {
-        recentContainer.innerHTML = `<p class="p-6 text-slate-400 text-center text-xs">Belum ada transaksi terekam.</p>`;
-      } else {
-        recentContainer.innerHTML = '';
-        // Ambil maksimal 3 order paling baru
-        [...orderHistory].reverse().slice(0, 3).forEach(order => {
-          recentContainer.innerHTML += `
-            <div class="p-4 flex justify-between items-center text-sm">
-              <div>
-                <span class="font-mono text-xs font-bold text-slate-700">${order.orderId}</span>
-                <p class="text-xs text-slate-400 mt-0.5">${order.date}</p>
-              </div>
-              <div class="text-right">
-                <span class="font-bold text-slate-800">${formatRupiah(order.total)}</span>
-                <p class="text-[11px] font-semibold text-sky-600">${order.status}</p>
-              </div>
-            </div>
-          `;
+        // Pasang fungsi logout
+        document.getElementById("adminLogout").addEventListener("click", (e) => {
+            e.preventDefault();
+            if(confirm("Apakah Anda yakin ingin keluar?")) {
+                logoutUser();
+            }
         });
-      }
 
-      // 6. Render Produk dengan Stok Kritis (Stok <= 3 Pcs)
-      const stockContainer = document.getElementById('dash-low-stock');
-      const lowStockProducts = products.filter(p => p.stock <= 3);
-
-      if (lowStockProducts.length === 0) {
-        stockContainer.innerHTML = `<p class="p-6 text-emerald-600 text-center text-xs font-medium">✅ Aman! Semua stok produk melimpah.</p>`;
-      } else {
-        stockContainer.innerHTML = '';
-        lowStockProducts.forEach(product => {
-          stockContainer.innerHTML += `
-            <div class="p-4 flex justify-between items-center text-sm">
-              <div class="flex items-center gap-3 truncate">
-                <img src="${product.img}" class="w-8 h-8 object-cover rounded border flex-shrink-0">
-                <span class="font-medium text-slate-700 truncate max-w-[120px]">${product.name}</span>
-              </div>
-              <span class="bg-red-50 text-red-600 font-bold px-2 py-1 rounded text-xs">
-                Sisa: ${product.stock}
-              </span>
-            </div>
-          `;
-        });
-      }
-    }
-
-    function formatRupiah(angka) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-    }
-  </script>
+        loadStats();
+    </script>
 </body>
 </html>

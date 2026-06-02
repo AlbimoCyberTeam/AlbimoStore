@@ -1,129 +1,150 @@
+<!-- admin/orders.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manajemen Pesanan | Admin Albimo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semua Transaksi Platform - Admin Panel</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .admin-layout { display: flex; }
+        .sidebar { width: 220px; background: #333; color: white; min-height: 100vh; padding: 20px; }
+        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
+        .content { flex: 1; padding: 30px; }
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; text-align: left; }
+        th, td { padding: 12px; border: 1px solid #ddd; }
+        th { background-color: #f4f4f4; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; }
+        .badge-pending { background: #ffeeba; color: #856404; }
+        .badge-process { background: #b8daff; color: #004085; }
+        .badge-shipped { background: #c3e6cb; color: #155724; }
+        .badge-canceled { background: #f5c6cb; color: #721c24; }
+    </style>
 </head>
-<body class="bg-slate-100 flex">
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Menu Navigasi Admin -->
+        <aside class="sidebar">
+            <h3>Albimo Admin</h3>
+            <hr>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="sellers.html">🏬 Kelola Seller</a>
+            <a href="users.html">👥 Kelola Pengguna</a>
+            <a href="products.html">📦 Semua Produk</a>
+            <a href="orders.html" style="font-weight: bold; color: #007bff;">📜 Riwayat Transaksi</a>
+            <hr>
+            <a href="#" id="adminLogout" style="color: #ff4d4d;">🚪 Keluar</a>
+        </aside>
 
-  <!-- Sidebar Berwarna Biru Gelap Profesional -->
-  <aside class="w-64 bg-slate-900 text-slate-300 min-h-screen p-6 sticky top-0 h-screen">
-    <div class="text-white text-xl font-bold tracking-wider mb-10 border-b border-slate-800 pb-4">ALBIMO ADMIN</div>
-    <nav class="space-y-2">
-      <a href="dashboard.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📊 Dashboard</a>
-      <a href="products.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">📦 Produk</a>
-      <a href="orders.html" class="block px-4 py-3 bg-sky-700 text-white rounded-xl font-medium">%_icon_% 🧾 Pesanan</a>
-      <a href="users.html" class="block px-4 py-3 hover:bg-slate-800 rounded-xl transition">👥 Pengguna</a>
-    </nav>
-  </aside>
+        <!-- Main Content Area -->
+        <main class="content">
+            <h2>Laporan Transaksi Global</h2>
+            <p>Berikut adalah daftar seluruh pesanan yang masuk di dalam platform e-commerce AlbimoStore-Pro.</p>
+            <hr>
 
-  <!-- Panel Konten Utama -->
-  <main class="flex-1 p-8 overflow-y-auto">
-    <header class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-slate-800">Manajemen Pesanan</h1>
-        <p class="text-sm text-slate-500 mt-1">Kelola transaksi dan perbarui status pengiriman pelanggan.</p>
-      </div>
-      <div id="order-counter" class="text-sm bg-sky-100 text-sky-800 px-4 py-2 rounded-xl font-semibold">
-        Total: 0 Pesanan
-      </div>
-    </header>
-
-    <!-- Tabel / List Transaksi Masuk -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-      <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-        <h3 class="font-bold text-slate-700">Daftar Transaksi Masuk</h3>
-      </div>
-      
-      <div class="divide-y divide-slate-100" id="admin-orders-list">
-        <!-- Data Transaksi di-render Otomatis via JS -->
-      </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Pesanan</th>
+                            <th>Tanggal</th>
+                            <th>Pembeli (Email)</th>
+                            <th>Metode</th>
+                            <th>Total Bayar</th>
+                            <th>Status</th>
+                            <th>Aksi Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOrdersTable">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Memuat seluruh data transaksi...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
-  </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      renderAdminOrders();
-    });
+    <script type="module">
+        import { protectPage } from "../assets/js/auth-guard.js";
+        import { logoutUser } from "../firebase/auth.js";
+        import { db } from "../firebase/config.js";
+        import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://gstatic.com";
 
-    function renderAdminOrders() {
-      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
-      const container = document.getElementById('admin-orders-list');
-      const counter = document.getElementById('order-counter');
+        // Kunci rute halaman: Hanya akun ber-role 'admin' yang bisa masuk!
+        protectPage(["admin"]);
 
-      counter.innerText = `Total: ${orderHistory.length} Pesanan`;
+        async function loadAllGlobalOrders() {
+            const tbody = document.getElementById("adminOrdersTable");
+            
+            try {
+                // Mengambil seluruh data pesanan dari Firestore tanpa filter rute vendor
+                const querySnapshot = await getDocs(collection(db, "orders"));
+                
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Belum ada riwayat transaksi di dalam aplikasi.</td></tr>`;
+                    return;
+                }
 
-      if (orderHistory.length === 0) {
-        container.innerHTML = `
-          <div class="p-12 text-center text-slate-400">
-            <span class="text-4xl block mb-2">📥</span>
-            Belum ada pesanan atau transaksi masuk dari pembeli.
-          </div>
-        `;
-        return;
-      }
+                tbody.innerHTML = "";
+                querySnapshot.forEach((orderDoc) => {
+                    const order = orderDoc.data();
+                    const orderId = orderDoc.id;
 
-      container.innerHTML = '';
-      
-      // Render data (Urutan dibalik agar pesanan terbaru berada di paling atas)
-      // Menggunakan salinan array agar tidak merusak urutan asli index di LocalStorage
-      [...orderHistory].reverse().forEach((order, reversedIndex) => {
-        // Mencari index asli di array orderHistory agar fungsi update status tidak salah target
-        const originalIndex = orderHistory.length - 1 - reversedIndex;
+                    // Mengatur warna visual badge status dari sisi admin pusat
+                    let badgeClass = "badge-pending";
+                    if (order.status === "Diproses") badgeClass = "badge-process";
+                    if (order.status === "Dikirim") badgeClass = "badge-shipped";
+                    if (order.status === "Dibatalkan") badgeClass = "badge-canceled";
 
-        let itemsText = order.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td><small><strong>${orderId}</strong></small></td>
+                        <td>${new Date(order.createdAt).toLocaleDateString('id-ID')}</td>
+                        <td>${order.customerEmail}</td>
+                        <td>${order.paymentMethod}</td>
+                        <td><strong>Rp ${order.totalPayment.toLocaleString('id-ID')}</strong></td>
+                        <td><span class="badge ${badgeClass}">${order.status}</span></td>
+                        <td>
+                            <button onclick="cancelOrderFromAdmin('${orderId}')" style="background:#dc3545; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:4px; font-size:12px;">Batalkan</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
 
-        container.innerHTML += `
-          <div class="p-6 hover:bg-slate-50/80 transition flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-1 flex-1">
-              <div class="flex items-center gap-3">
-                <span class="font-mono text-sm font-bold text-slate-700">${order.orderId}</span>
-                <span class="text-xs text-slate-400">${order.date}</span>
-              </div>
-              <p class="text-sm font-medium text-slate-800 line-clamp-1"><strong class="text-slate-400">Produk:</strong> ${itemsText}</p>
-              <p class="text-md font-bold text-sky-600">${formatRupiah(order.total)}</p>
-            </div>
+            } catch (error) {
+                console.error("Gagal memuat transaksi global:", error);
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Gagal memuat data dari database Firebase.</td></tr>`;
+            }
+        }
 
-            <!-- Kontrol Status (Tema Biru Pro) -->
-            <div class="flex items-center gap-3">
-              <select onchange="updateOrderStatus(${originalIndex}, this.value)" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <option value="Menunggu Pembayaran" ${order.status === 'Menunggu Pembayaran' ? 'selected' : ''}>⏳ Menunggu Pembayaran</option>
-                <option value="Diproses" ${order.status === 'Diproses' ? 'selected' : ''}>📦 Diproses</option>
-                <option value="Dikirim" ${order.status === 'Dikirim' ? 'selected' : ''}>🚚 Dikirim</option>
-                <option value="Selesai" ${order.status === 'Selesai' ? 'selected' : ''}>✅ Selesai</option>
-                <option value="Dibatalkan" ${order.status === 'Dibatalkan' ? 'selected' : ''}>❌ Dibatalkan</option>
-              </select>
-            </div>
-          </div>
-        `;
-      });
-    }
+        // Fungsi pembatalan pesanan darurat oleh admin pusat (Misal: Terjadi fraud/penipuan)
+        window.cancelOrderFromAdmin = async (orderId) => {
+            if (confirm("Apakah Anda yakin ingin membatalkan transaksi ini selaku Admin Pusat?")) {
+                try {
+                    const orderRef = doc(db, "orders", orderId);
+                    await updateDoc(orderRef, {
+                        status: "Dibatalkan"
+                    });
+                    alert("Transaksi telah berhasil dibatalkan oleh sistem pusat.");
+                    loadAllGlobalOrders(); // Segarkan tampilan tabel database
+                } catch (error) {
+                    alert("Gagal memperbarui data: " + error.message);
+                }
+            }
+        };
 
-    // Fungsi untuk memperbarui status pesanan secara realtime
-    function updateOrderStatus(index, newStatus) {
-      const orderHistory = JSON.parse(localStorage.getItem('albimo_order_history')) || [];
-      
-      if (orderHistory[index]) {
-        orderHistory[index].status = newStatus;
-        localStorage.setItem('albimo_order_history', JSON.stringify(orderHistory));
-        
-        // Memunculkan notifikasi sukses kecil ala Toast
-        const alertBox = document.createElement('div');
-        alertBox.className = "fixed bottom-5 right-5 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium z-50 animate-bounce";
-        alertBox.innerText = `Status Pesanan ${orderHistory[index].orderId} diubah menjadi: ${newStatus}`;
-        document.body.appendChild(alertBox);
-        
-        setTimeout(() => { alertBox.remove(); }, 2500);
-        renderAdminOrders(); // Segarkan tampilan tabel admin
-      }
-    }
+        // Pasang fungsi logout pada menu sidebar admin
+        document.getElementById("adminLogout").addEventListener("click", (e) => {
+            e.preventDefault();
+            if (confirm("Apakah Anda yakin ingin keluar?")) {
+                logoutUser();
+            }
+        });
 
-    function formatRupiah(angka) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-    }
-  </script>
+        // Jalankan pemanggilan data pesanan secara otomatis saat halaman dimuat
+        loadAllGlobalOrders();
+    </script>
 </body>
 </html>

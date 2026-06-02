@@ -1,10 +1,10 @@
-<!-- admin/users.html -->
+<!-- admin/sellers.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Pengguna - Admin Panel</title>
+    <title>Kelola Vendor Toko - Admin Panel</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         .admin-layout { display: flex; }
@@ -15,10 +15,7 @@
         table { width: 100%; border-collapse: collapse; background: white; text-align: left; }
         th, td { padding: 12px; border: 1px solid #ddd; }
         th { background-color: #f4f4f4; font-weight: bold; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; }
-        .badge-customer { background: #e2e8f0; color: #475569; }
-        .badge-seller { background: #dbeafe; color: #1e40af; }
-        .badge-admin { background: #fce7f3; color: #9d174d; }
+        .no-store { color: #94a3b8; font-style: italic; }
     </style>
 </head>
 <body>
@@ -28,8 +25,8 @@
             <h3>Albimo Admin</h3>
             <hr>
             <a href="dashboard.html">📊 Dashboard</a>
-            <a href="sellers.html">🏬 Kelola Seller</a>
-            <a href="users.html" style="font-weight: bold; color: #007bff;">👥 Kelola Pengguna</a>
+            <a href="sellers.html" style="font-weight: bold; color: #007bff;">🏬 Kelola Seller</a>
+            <a href="users.html">👥 Kelola Pengguna</a>
             <a href="products.html">📦 Semua Produk</a>
             <a href="orders.html">📜 Riwayat Transaksi</a>
             <hr>
@@ -38,24 +35,24 @@
 
         <!-- Main Content Area -->
         <main class="content">
-            <h2>Manajemen Pengguna Global</h2>
-            <p>Daftar seluruh akun (Customer, Seller, dan Admin) yang terdaftar di dalam sistem basis data AlbimoStore-Pro.</p>
+            <h2>Daftar Vendor & Seller Terdaftar</h2>
+            <p>Memantau informasi profil usaha dan identitas toko dari seluruh mitra penjual AlbimoStore-Pro.</p>
             <hr>
 
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>UID Pengguna</th>
-                            <th>Nama Lengkap</th>
-                            <th>Email</th>
-                            <th>Hak Akses (Role)</th>
-                            <th>Tanggal Terdaftar</th>
+                            <th>Nama Pemilik</th>
+                            <th>Email Kontak</th>
+                            <th>Nama Toko</th>
+                            <th>Slogan Usaha</th>
+                            <th>Deskripsi Toko</th>
                         </tr>
                     </thead>
-                    <tbody id="adminUsersTable">
+                    <tbody id="adminSellersTable">
                         <tr>
-                            <td colspan="5" style="text-align: center;">Memuat daftar seluruh pengguna...</td>
+                            <td colspan="5" style="text-align: center;">Memuat data vendor...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -67,49 +64,47 @@
         import { protectPage } from "../assets/js/auth-guard.js";
         import { logoutUser } from "../firebase/auth.js";
         import { db } from "../firebase/config.js";
-        import { collection, getDocs } from "https://gstatic.com";
+        import { collection, query, where, getDocs } from "https://gstatic.com";
 
         // Kunci rute halaman: Hanya akun ber-role 'admin' yang bisa masuk!
         protectPage(["admin"]);
 
-        async function loadAllUsers() {
-            const tbody = document.getElementById("adminUsersTable");
+        async function loadAllSellers() {
+            const tbody = document.getElementById("adminSellersTable");
             
             try {
-                // Mengambil seluruh data user dari koleksi "users" di Firestore
-                const querySnapshot = await getDocs(collection(db, "users"));
+                // Menjalankan Query Firestore untuk memfilter pengguna yang HANYA memiliki role 'seller'
+                const q = query(collection(db, "users"), where("role", "==", "seller"));
+                const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Belum ada pengguna terdaftar.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Belum ada mitra seller yang mendaftar.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = "";
-                querySnapshot.forEach((userDoc) => {
-                    const userData = userDoc.data();
-                    const userId = userDoc.id;
-
-                    // Mengatur warna visual badge berdasarkan hak akses user
-                    let badgeClass = "badge-customer";
-                    if (userData.role === "seller") badgeClass = "badge-seller";
-                    if (userData.role === "admin") badgeClass = "badge-admin";
-
-                    // Memformat penulisan tanggal pendaftaran
-                    const regDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('id-ID') : "-";
+                querySnapshot.forEach((sellerDoc) => {
+                    const sellerData = sellerDoc.data();
+                    
+                    // Ambil detail toko jika sudah diisi, berikan fallback jika belum setup profil
+                    const store = sellerData.storeDetails || {};
+                    const storeName = store.name || `<span class="no-store">Belum setup nama</span>`;
+                    const storeSlogan = store.slogan || `<span class="no-store">-</span>`;
+                    const storeDesc = store.description || `<span class="no-store">Belum mengisi deskripsi</span>`;
 
                     const row = document.createElement("tr");
                     row.innerHTML = `
-                        <td><small><code>${userId}</code></small></td>
-                        <td>${userData.fullName || "Tanpa Nama"}</td>
-                        <td>${userData.email}</td>
-                        <td><span class="badge ${badgeClass}">${userData.role || "customer"}</span></td>
-                        <td>${regDate}</td>
+                        <td><strong>${sellerData.fullName || "Tanpa Nama"}</strong></td>
+                        <td>${sellerData.email}</td>
+                        <td>${storeName}</td>
+                        <td>${storeSlogan}</td>
+                        <td><small>${storeDesc}</small></td>
                     `;
                     tbody.appendChild(row);
                 });
 
             } catch (error) {
-                console.error("Gagal memuat daftar pengguna:", error);
+                console.error("Gagal memuat daftar seller:", error);
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Gagal memuat data dari database Firebase.</td></tr>`;
             }
         }
@@ -122,8 +117,8 @@
             }
         });
 
-        // Jalankan pengambilan data secara otomatis saat halaman terbuka
-        loadAllUsers();
+        // Jalankan pemanggilan data otomatis saat halaman diakses
+        loadAllSellers();
     </script>
 </body>
 </html>
