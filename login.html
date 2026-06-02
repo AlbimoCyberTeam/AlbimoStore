@@ -1,4 +1,3 @@
-<!-- login.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -20,34 +19,36 @@
     </div>
 
     <script type="module">
-        import { loginUser } from "./firebase/auth.js";
+import { loginUser } from "./firebase/auth.js";
 
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-            const email = document.getElementById("loginEmail").value;
-            const password = document.getElementById("loginPassword").value;
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
 
-            const result = await loginUser(email, password);
+const result = await loginUser(email, password);
 
-            if (result.success) {
-                // Pengalihan otomatis berdasarkan ROLE pengguna
-                if (result.role === "admin") {
-                    window.location.href = "admin/dashboard.html";
-                } else if (result.role === "seller") {
-                    window.location.href = "seller/dashboard.html";
-                } else {
-                    window.location.href = "customer/account.html";
-                }
-            } else {
-                alert("Login gagal: " + result.message);
-            }
-        });
-        <!-- Taruh skrip ini di bagian paling bawah sebelum tag </body> -->
+console.log("HASIL LOGIN:", result);
+alert(JSON.stringify(result));
+
+    if (result.success) {
+        if (result.role === "admin") {
+            window.location.href = "admin/dashboard.html";
+        } else if (result.role === "seller") {
+            window.location.href = "seller/dashboard.html";
+        } else {
+            window.location.href = "customer/account.html";
+        }
+    } else {
+        alert("Login gagal: " + result.message);
+    }
+});
+</script>
+
 <script type="module">
-    import { initNavbar } from "../assets/js/navbar.js";
-    // Berikan nilai true karena file ini berada di dalam subfolder
-    initNavbar(true);
+import { initNavbar } from "./assets/js/navbar.js";
+initNavbar(false);
 </script>
 </body>
 </html>
