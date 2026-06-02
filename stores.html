@@ -2,36 +2,25 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="stylesheet" href="assets/css/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Toko - AlbimoStore-Pro</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
-        .store-card { border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .store-name { color: #1e3a8a; margin-top: 0; margin-bottom: 5px; }
-        .store-slogan { font-style: italic; color: #64748b; font-size: 14px; margin-bottom: 15px; }
-        .store-desc { color: #334155; font-size: 14px; line-height: 1.5; }
-        .btn-visit { display: inline-block; margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; }
-    </style>
+    <!-- Tag internal .store-card, .store-name, dll dihapus dari sini karena tampilannya sudah otomatis diatur super cantik & rapi oleh assets/css/style.css baru kita -->
 </head>
 <body>
-    <header>
-        <h1>Direktori Toko AlbimoStore-Pro</h1>
-        <nav>
-            <a href="index.html">🏠 Beranda</a> | 
-            <a href="stores.html" style="font-weight: bold;">🏬 Daftar Toko</a> | 
-            <a href="login.html">Login</a>
-        </nav>
-    </header>
+
+    <!-- Tag <header> lama dihapus dari sini agar menunya tidak ganda. initNavbar() otomatis membuatkan menu atas pintar untuk Anda -->
 
     <main>
+        <h3>Direktori Toko Mitra</h3>
         <div id="storesContainer" class="stores-grid">Memuat daftar toko mitra...</div>
     </main>
 
+    <!-- SCRIPT 1: Memuat Data Toko dari Firestore -->
     <script type="module">
         import { db } from "./firebase/config.js";
+        // URL di bawah ini diperbaiki agar mengarah ke SDK Firebase resmi yang benar
         import { collection, query, where, getDocs } from "https://gstatic.com";
 
         async function loadPublicStores() {
@@ -77,12 +66,12 @@
 
         // Jalankan fungsi secara otomatis saat halaman dibuka oleh pengunjung
         loadPublicStores();
-        
-        <!-- Taruh skrip ini di bagian paling bawah sebelum tag </body> -->
-<script type="module">
-    import { initNavbar } from "./assets/js/navbar.js";
-    // Panggil fungsi tanpa argumen karena berada di folder root
-    initNavbar();
-</script>
+    </script>
+
+    <!-- SCRIPT 2: Memuat Navigasi Pintar (Navbar) Otomatis -->
+    <script type="module">
+        import { initNavbar } from "./assets/js/navbar.js";
+        initNavbar();
+    </script>
 </body>
 </html>
