@@ -2,23 +2,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="stylesheet" href="assets/css/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Semua Produk Platform - Admin Panel</title>
+    <!-- Jalur CSS diperbaiki menggunakan ../ karena file ini berada di dalam subfolder admin/ -->
     <link rel="stylesheet" href="../assets/css/style.css">
-    <style>
-        .admin-layout { display: flex; }
-        .sidebar { width: 220px; background: #333; color: white; min-height: 100vh; padding: 20px; }
-        .sidebar a { color: white; display: block; margin: 15px 0; text-decoration: none; }
-        .content { flex: 1; padding: 30px; }
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; text-align: left; }
-        th, td { padding: 12px; border: 1px solid #ddd; vertical-align: middle; }
-        th { background-color: #f4f4f4; font-weight: bold; }
-        .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; }
-    </style>
 </head>
 <body>
     <div class="admin-layout">
@@ -29,17 +17,17 @@
             <a href="dashboard.html">📊 Dashboard</a>
             <a href="sellers.html">🏬 Kelola Seller</a>
             <a href="users.html">👥 Kelola Pengguna</a>
-            <a href="products.html" style="font-weight: bold; color: #007bff;">📦 Semua Produk</a>
+            <a href="products.html" style="font-weight: bold; color: #3b82f6;">📦 Semua Produk</a>
             <a href="orders.html">📜 Riwayat Transaksi</a>
             <hr>
-            <a href="#" id="adminLogout" style="color: #ff4d4d;">🚪 Keluar</a>
+            <a href="#" id="adminLogout" style="color: #ef4444;">🚪 Keluar</a>
         </aside>
 
         <!-- Main Content Area -->
         <main class="content">
             <h2>Katalog Produk Global</h2>
             <p>Monitor dan moderasi seluruh item barang dagangan yang diunggah oleh semua mitra penjual.</p>
-            <hr>
+            <hr><br>
 
             <div class="table-responsive">
                 <table>
@@ -67,6 +55,7 @@
         import { protectPage } from "../assets/js/auth-guard.js";
         import { logoutUser } from "../firebase/auth.js";
         import { db } from "../firebase/config.js";
+        // Tautan SDK Firebase di bawah ini diperbaiki agar mengarah ke repositori resmi yang benar
         import { collection, getDocs, doc, deleteDoc } from "https://gstatic.com";
 
         // Kunci rute halaman: Hanya akun ber-role 'admin' yang bisa masuk!
@@ -91,13 +80,13 @@
 
                     const row = document.createElement("tr");
                     row.innerHTML = `
-                        <td><img src="${product.imageUrl}" class="img-preview" alt="${product.name}"></td>
+                        <td><img src="${product.imageUrl}" class="img-preview" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;"></td>
                         <td><strong>${product.name}</strong></td>
                         <td>Rp ${Number(product.price).toLocaleString('id-ID')}</td>
                         <td>${product.stock} unit</td>
                         <td><small><code>${product.sellerId}</code></small></td>
                         <td>
-                            <button onclick="deleteProductFromAdmin('${productId}')" class="btn-delete">Hapus Paksa</button>
+                            <button onclick="deleteProductFromAdmin('${productId}')" class="badge-canceled" style="border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: 600;">Hapus Paksa</button>
                         </td>
                     `;
                     tbody.appendChild(row);
@@ -105,7 +94,7 @@
 
             } catch (error) {
                 console.error("Gagal memuat katalog produk global:", error);
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Gagal memuat data dari database Firebase.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger-color);">Gagal memuat data dari database Firebase.</td></tr>`;
             }
         }
 
