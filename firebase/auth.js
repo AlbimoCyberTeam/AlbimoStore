@@ -46,8 +46,12 @@ export async function loginUser(email, password) {
     }
 }
 
-// 3. Logout
 export async function logoutUser() {
-    await signOut(auth);
-    window.location.href = "../auth/login.html";
+    try {
+        await signOut(auth);
+        window.location.href = "../login.html";
+    } catch (error) {
+        console.error("Logout gagal:", error);
+        alert("Logout gagal: " + error.message);
+    }
 }
