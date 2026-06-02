@@ -7,7 +7,7 @@ import { cloudinaryConfig } from "./config.js";
  * @returns {Promise<string>} - Mengembalikan URL gambar jika sukses
  */
 export async function uploadImageToCloudinary(fileObject) {
-    const url = `https://cloudinary.com{cloudinaryConfig.cloudName}/image/upload`;
+    const url = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`;
     
     const formData = new FormData();
     formData.append("file", fileObject);
