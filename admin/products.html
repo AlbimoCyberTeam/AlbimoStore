@@ -56,7 +56,12 @@
         import { logoutUser } from "../firebase/auth.js";
         import { db } from "../firebase/config.js";
         // Tautan SDK Firebase di bawah ini diperbaiki agar mengarah ke repositori resmi yang benar
-        import { collection, getDocs, doc, deleteDoc } from "https://gstatic.com";
+        import {
+    collection,
+    getDocs,
+    doc,
+    deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // Kunci rute halaman: Hanya akun ber-role 'admin' yang bisa masuk!
         protectPage(["admin"]);
