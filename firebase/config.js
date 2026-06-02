@@ -1,19 +1,25 @@
+// firebase/config.js
+import { initializeApp } from "https://gstatic.com";
+import { getAuth } from "https://gstatic.com";
+import { getFirestore } from "https://gstatic.com";
 
-// Firebase SDK v10
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+// Ganti dengan konfigurasi asli dari Firebase Console Anda
 const firebaseConfig = {
-  apiKey: "AIzaSyC_mlSh_6OoqgydUbfhFPpXEBAQjcBNNiM",
-  authDomain: "albimostore.firebaseapp.com",
-  databaseURL: "https://albimostore-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  projectId: "albimostore",
-  storageBucket: "albimostore.firebasestorage.app",
-  messagingSenderId: "609426144482",
-  appId: "1:609426144482:web:fa6c9107832ea6ff4d72bb"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "://firebaseapp.com",
+    projectId: "your-app",
+    storageBucket: "://appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
 
+// Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Konfigurasi Cloudinary (untuk upload gambar)
+export const cloudinaryConfig = {
+    cloudName: "YOUR_CLOUDINARY_NAME",
+    uploadPreset: "YOUR_UPLOAD_PRESET" // Pastikan mode 'unsigned' aktif di Cloudinary
+};
