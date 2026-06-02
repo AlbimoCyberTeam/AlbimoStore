@@ -6,7 +6,7 @@ import {
     getDocs, 
     query, 
     where 
-} from "https://gstatic.com";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // 1. Tambah Produk Baru (Untuk Seller)
 export async function addProduct(sellerId, productData) {

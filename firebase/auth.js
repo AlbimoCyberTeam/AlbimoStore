@@ -4,8 +4,8 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     signOut 
-} from "https://gstatic.com";
-import { doc, setDoc, getDoc } from "https://gstatic.com";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // 1. Registrasi Pengguna Baru (Customer atau Seller)
 export async function registerUser(email, password, fullName, role) {
@@ -49,5 +49,5 @@ export async function loginUser(email, password) {
 // 3. Logout
 export async function logoutUser() {
     await signOut(auth);
-    window.location.href = "/login.html";
+    window.location.href = "../auth/login.html";
 }

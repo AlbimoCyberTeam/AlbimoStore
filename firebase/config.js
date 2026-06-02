@@ -1,7 +1,7 @@
 // firebase/config.js
-import { initializeApp } from "https://gstatic.com";
-import { getAuth } from "https://gstatic.com";
-import { getFirestore } from "https://gstatic.com";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Ganti dengan konfigurasi asli dari Firebase Console Anda
 const firebaseConfig = {
