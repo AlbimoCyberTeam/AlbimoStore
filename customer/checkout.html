@@ -210,6 +210,12 @@ import {
     collection,
     addDoc
 }
+
+import {
+    uploadImageToCloudinary
+}
+from "../firebase/cloudinary.js";
+
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 protectPage(["customer"]);
@@ -277,6 +283,21 @@ async(e)=>{
 
             return;
         }
+        
+const proofFile =
+document.getElementById(
+    "paymentProof"
+).files[0];
+
+let proofUrl = "";
+
+if(proofFile){
+
+    proofUrl =
+    await uploadImageToCloudinary(
+        proofFile
+    );
+}
 
         let grandTotal =
         cart.reduce(
