@@ -5,73 +5,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keranjang Belanja - AlbimoStore-Pro</title>
+
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-    <h2>Keranjang Belanja Anda</h2>
-    <div id="cartList">Keranjang Anda kosong.</div>
-    <hr>
-    <h3>Total: <span id="cartTotal">Rp 0</span></h3>
-    <!-- Cari bagian tag ini di customer/cart.html dan ganti parameternya -->
-<button id="btnCheckout" onclick="window.location.href='checkout.html'" disabled>Lanjutkan ke Pembayaran</button>
 
-    <script type="module">
-        import { protectPage } from "../assets/js/auth-guard.js";
-        
-        // Kunci halaman khusus untuk Customer
-        protectPage(["customer"]);
+<h2>Keranjang Belanja Anda</h2>
 
-        function displayCart() {
-            // Ambil data dari localStorage
-            const cart = JSON.parse(localStorage.getItem("albimo_cart")) || [];
-            const listContainer = document.getElementById("cartList");
-            const totalContainer = document.getElementById("cartTotal");
-            const btnCheckout = document.getElementById("btnCheckout");
+<div id="cartList">
+    Keranjang Anda kosong.
+</div>
 
-            if (cart.length === 0) {
-                listContainer.innerHTML = "<p>Keranjang Anda kosong.</p>";
-                totalContainer.innerText = "Rp 0";
-                btnCheckout.disabled = true;
-                return;
-            }
+<hr>
 
-            listContainer.innerHTML = "";
-            let grandTotal = 0;
+<h3>Total: <span id="cartTotal">Rp 0</span></h3>
 
-            cart.forEach((item, index) => {
-                const subtotal = item.price * item.quantity;
-                grandTotal += subtotal;
+<button id="btnCheckout"
+onclick="window.location.href='checkout.html'"
+disabled>
+    Lanjutkan ke Pembayaran
+</button>
 
-                const row = document.createElement("div");
-                row.style.margin = "10px 0";
-                row.innerHTML = `
-                    <strong>${item.name}</strong> - Rp ${item.price.toLocaleString('id-ID')} 
-                    x ${item.quantity} = Rp ${subtotal.toLocaleString('id-ID')}
-                    <button onclick="removeFromCart(${index})">Hapus</button>
-                `;
-                listContainer.appendChild(row);
-            });
-
-            totalContainer.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-            btnCheckout.disabled = false;
-        }
-
-        // Fungsi hapus item dari keranjang
-        window.removeFromCart = (index) => {
-            let cart = JSON.parse(localStorage.getItem("albimo_cart")) || [];
-            cart.splice(index, 1);
-            localStorage.setItem("albimo_cart", JSON.stringify(cart));
-            displayCart();
-        };
-
-        // Jalankan tampilan keranjang saat halaman dimuat
-        displayCart();
-
-<!-- Taruh skrip ini di bagian paling bawah sebelum tag </body> -->
 <script type="module">
-    import { initNavbar } from "../assets/js/navbar.js";
-    // Berikan nilai true karena file ini berada di dalam subfolder
-    initNavbar(true);
+
+import { protectPage } from "../assets/js/auth-guard.js";
+import { initNavbar } from "../assets/js/navbar.js";
+
+// Kunci halaman customer
+protectPage(["customer"]);
+
+// Navbar
+initNavbar(true);
+
+function displayCart() {
+
+    const cart =
+        JSON.parse(localStorage.getItem("albimo_cart")) || [];
+
+    const listContainer =
+        document.getElementById("cartList");
+
+    const totalContainer =
+        document.getElementById("cartTotal");
+
+    const btnCheckout =
+        document.getElementById("btnCheckout");
+
+    if (cart.length === 0) {
+
+        listContainer.innerHTML =
+            "<p>Keranjang Anda kosong.</p>";
+
+        totalContainer.innerText = "Rp 0";
+
+        btnCheckout.disabled = true;
+
+        return;
+    }
+
+    listContainer.innerHTML = "";
+
+    let grandTotal = 0;
+
+    cart.forEach((item, index) => {
+
+        const subtotal =
+            item.price * item.quantity;
+
+        grandTotal += subtotal;
+
+        const row = document.createElement("div");
+
+        row.style.margin = "10px 0";
+
+        row.innerHTML = `
+            <strong>${item.name}</strong>
+            - Rp ${item.price.toLocaleString('id-ID')}
+            x ${item.quantity}
+            = Rp ${subtotal.toLocaleString('id-ID')}
+
+            <button onclick="removeFromCart(${index})">
+                Hapus
+            </button>
+        `;
+
+        listContainer.appendChild(row);
+    });
+
+    totalContainer.innerText =
+        `Rp ${grandTotal.toLocaleString('id-ID')}`;
+
+    btnCheckout.disabled = false;
+}
+
+// Hapus item keranjang
+window.removeFromCart = (index) => {
+
+    let cart =
+        JSON.parse(localStorage.getItem("albimo_cart")) || [];
+
+    cart.splice(index, 1);
+
+    localStorage.setItem(
+        "albimo_cart",
+        JSON.stringify(cart)
+    );
+
+    displayCart();
+};
+
+// Jalankan
+displayCart();
+
 </script>
+
 </body>
 </html>
