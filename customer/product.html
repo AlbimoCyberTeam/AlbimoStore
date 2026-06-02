@@ -2,20 +2,55 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="stylesheet" href="assets/css/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Produk - AlbimoStore-Pro</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        .detail-container { display: flex; gap: 30px; padding: 20px; }
-        .detail-image img { max-width: 400px; border-radius: 8px; }
-        .detail-info { max-width: 600px; }
+        .detail-container {
+            display: flex;
+            gap: 30px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-image img {
+            max-width: 100%;
+            width: 400px;
+            border-radius: 8px;
+        }
+
+        .detail-info {
+            max-width: 600px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn-group button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+        }
+
+        #btnAddToCart {
+            background: #28a745;
+        }
+
+        #btnAddToWishlist {
+            background: #64748b;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <a href="index.html">← Kembali ke Katalog</a>
+    <header style="padding:15px;">
+        <a href="../index.html">← Kembali ke Katalog</a>
     </header>
 
     <div class="detail-container" id="productDetail">
@@ -23,18 +58,22 @@
     </div>
 
     <script type="module">
-        import { db, auth } from "./firebase/config.js";
-        import { doc, getDoc } from "https://gstatic.com";
+        import { db, auth } from "../firebase/config.js";
+        import {
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // 1. Ambil ID Produk dari URL (?id=xxxx)
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
 
         let currentProduct = null;
 
         async function loadProductDetail() {
+            const container = document.getElementById("productDetail");
+
             if (!productId) {
-                document.getElementById("productDetail").innerHTML = "<p>Produk tidak ditemukan.</p>";
+                container.innerHTML = "<p>Produk tidak ditemukan.</p>";
                 return;
             }
 
@@ -42,55 +81,66 @@
                 const docRef = doc(db, "products", productId);
                 const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    currentProduct = docSnap.data();
-                    currentProduct.id = docSnap.id;
+                if (!docSnap.exists()) {
+                    container.innerHTML = "<p>Produk tidak ditemukan di database.</p>";
+                    return;
+                }
 
-                    document.getElementById("productDetail").innerHTML = `
-                        <div class="detail-image">
-                            <img src="${currentProduct.imageUrl}" alt="${currentProduct.name}">
-                        </div>
-                        <div class="detail-info">
-                            <h2>${currentProduct.name}</h2>
-                            <h3 style="color: #e44d26;">Rp ${Number(currentProduct.price).toLocaleString('id-ID')}</h3>
-                            <p><strong>Stok:</strong> ${currentProduct.stock} unit</p>
-                            <p><strong>Deskripsi:</strong></p>
-                            <p>${currentProduct.description}</p>
-                            <br>
-                            <button id="btnAddToCart" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer;">
+                currentProduct = {
+                    id: docSnap.id,
+                    ...docSnap.data()
+                };
+
+                container.innerHTML = `
+                    <div class="detail-image">
+                        <img src="${currentProduct.imageUrl}" alt="${currentProduct.name}">
+                    </div>
+
+                    <div class="detail-info">
+                        <h2>${currentProduct.name}</h2>
+
+                        <h3 style="color:#2563eb;">
+                            Rp ${Number(currentProduct.price).toLocaleString('id-ID')}
+                        </h3>
+
+                        <p><strong>Stok:</strong> ${currentProduct.stock} unit</p>
+
+                        <p><strong>Deskripsi:</strong></p>
+                        <p>${currentProduct.description}</p>
+
+                        <div class="btn-group">
+                            <button id="btnAddToCart">
                                 🛒 Masukkan Keranjang
                             </button>
-                        </div>
-                    `;
-                    
-                    <!-- Tambahkan tombol ini di dalam template HTML product.html dekat tombol keranjang -->
-<button id="btnAddToWishlist" style="padding: 10px 20px; background: #64748b; color: white; border: none; cursor: pointer; margin-top: 10px;">
-    ❤️ Tambah ke Wishlist
-</button>
 
-                    // Pasang event listener ke tombol keranjang
-                    document.getElementById("btnAddToCart").addEventListener("click", addToCart);
-                } else {
-                    document.getElementById("productDetail").innerHTML = "<p>Produk tidak ditemukan di database.</p>";
-                }
+                            <button id="btnAddToWishlist">
+                                ❤️ Tambah Wishlist
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById("btnAddToCart")
+                    .addEventListener("click", addToCart);
+
+                document.getElementById("btnAddToWishlist")
+                    .addEventListener("click", addToWishlist);
+
             } catch (error) {
                 console.error(error);
-                document.getElementById("productDetail").innerHTML = "<p>Gagal memuat data produk.</p>";
+                container.innerHTML = `<p>Gagal memuat detail produk: ${error.message}</p>`;
             }
         }
 
-        // 2. Fungsi Menambahkan ke Keranjang LocalStorage
         function addToCart() {
-            // Proteksi: Harus login dulu untuk beli
             if (!auth.currentUser) {
                 alert("Silakan login terlebih dahulu untuk berbelanja!");
-                window.location.href = "login.html";
+                window.location.href = "../login.html";
                 return;
             }
 
             let cart = JSON.parse(localStorage.getItem("albimo_cart")) || [];
-            
-            // Cek apakah produk sudah ada di keranjang
+
             const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id);
 
             if (existingItemIndex > -1) {
@@ -109,27 +159,28 @@
             alert("Produk berhasil dimasukkan ke keranjang!");
         }
 
+        function addToWishlist() {
+            let wishlist = JSON.parse(localStorage.getItem("albimo_wishlist")) || [];
+
+            const isExist = wishlist.some(item => item.id === currentProduct.id);
+
+            if (isExist) {
+                alert("Produk sudah ada di wishlist.");
+                return;
+            }
+
+            wishlist.push({
+                id: currentProduct.id,
+                name: currentProduct.name,
+                price: Number(currentProduct.price),
+                imageUrl: currentProduct.imageUrl
+            });
+
+            localStorage.setItem("albimo_wishlist", JSON.stringify(wishlist));
+            alert("Produk berhasil ditambahkan ke wishlist!");
+        }
+
         loadProductDetail();
-        
-        // Daftarkan event listener di bawah penanganan fungsi addToCart pada berkas product.html
-document.getElementById("btnAddToWishlist").addEventListener("click", () => {
-    let wishlist = JSON.parse(localStorage.getItem("albimo_wishlist")) || [];
-    const isExist = wishlist.some(item => item.id === currentProduct.id);
-    
-    if (!isExist) {
-        wishlist.push({
-            id: currentProduct.id,
-            name: currentProduct.name,
-            price: Number(currentProduct.price),
-            imageUrl: currentProduct.imageUrl
-        });
-        localStorage.setItem("albimo_wishlist", JSON.stringify(wishlist));
-        alert("Produk ditambahkan ke daftar keinginan!");
-    } else {
-        alert("Produk ini sudah ada di dalam wishlist Anda.");
-    }
-});
-        
     </script>
 </body>
 </html>
